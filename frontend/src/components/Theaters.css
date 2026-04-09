@@ -1,0 +1,169 @@
+/* Theaters.css */
+@import url("https://fonts.googleapis.com/css2?family=Sofia&display=swap");
+
+.theaters-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.theaters-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.theaters-title {
+  font-size: 2.5rem;
+  color: #f710b1;
+  font-family: "Sofia", sans-serif;
+  text-shadow: 0 0 5px #f710b1, 0 0 10px #f710b1;
+}
+
+.theaters-movie-details {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.theaters-movie-card {
+  background-color: #000;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 20px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
+  color: #00bfff;
+}
+
+.theaters-movie-image {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.theaters-movie-title {
+  font-size: 1.5rem;
+  margin: 10px 0;
+  color: #00bfff;
+  text-shadow: 0 0 5px #00bfff, 0 0 10px #00bfff;
+}
+
+.theaters-movie-info {
+  margin: 5px 0;
+  color: #add8e6;
+}
+
+.theaters-reviews {
+  margin-top: 15px;
+  text-align: left;
+}
+
+.theaters-reviews-title {
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+  color: #00bfff;
+}
+
+.theaters-review-item {
+  color: #add8e6;
+  margin: 5px 0;
+}
+
+.theaters-list {
+  margin-top: 40px;
+}
+
+.theaters-section-title {
+  font-size: 2rem;
+  color: #f710b1;
+  font-family: "Sofia", sans-serif;
+  text-shadow: 0 0 5px #f710b1, 0 0 10px #f710b1;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.theaters-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 20px;
+  padding-bottom: 20px;
+}
+
+.theaters-item {
+  background-color: #000;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 15px;
+  flex: 0 0 300px;
+  box-shadow: 0 2px 5px rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.theaters-item-title {
+  color: #00bfff;
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+  text-shadow: 0 0 3px #00bfff;
+}
+
+.theaters-item-info {
+  margin: 8px 0;
+  color: #add8e6;
+}
+
+.theaters-buy-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #f710b1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.theaters-buy-btn:hover {
+  background-color: #d60d98;
+}
+
+.theaters-abc {
+  background-color: white;
+  color: #000;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.theaters-abc {
+  background-color: #000;
+  height: 100px;
+}
+
+.theaters-abcd {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .theaters-container {
+    padding: 10px;
+  }
+
+  .theaters-movie-card {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .theaters-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .theaters-item {
+    width: 100%;
+    max-width: 300px;
+    flex: none;
+  }
+}

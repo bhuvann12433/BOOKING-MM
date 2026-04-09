@@ -1,0 +1,261 @@
+/* BuyTicket.css */
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: black;
+  /* width: 300px; */
+}
+
+.buyticket-header {
+  background-color: green;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  font-size: 2em;
+  width: 900px;
+}
+
+/* .buyticket-date-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+} */
+
+/* .buyticket-arrow {
+  font-size: 24px;
+  cursor: pointer;
+  padding: 10px;
+  color: white;
+  user-select: none;
+} */
+
+/* .buyticket-date-selector {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;  
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: 0 10px;
+  gap: 10px;
+} */
+
+/* .buyticket-date-selector::-webkit-scrollbar {
+  display: none;
+}
+
+.buyticket-date-selector div {
+  padding: 10px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  background-color: blue;
+  transition: background-color 0.3s, transform 0.2s;
+} */
+
+/* .buyticket-date-selector div:hover {
+  /* background-color: 
+  transform: scale(1.05);
+}
+
+.buyticket-date-selector .active {
+  background-color: #6200ea;
+  color: white;
+  font-weight: bold;
+} */
+
+.buyticket-container {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 20px;
+}
+
+.buyticket-cinema {
+  background-color: #fff;
+  margin: 15px;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.buyticket-cinema strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 18px;
+  color: #333;
+}
+
+.buyticket-cinema i {
+  font-size: 14px;
+  color: #757575;
+}
+
+.buyticket-timing-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.buyticket-show-time {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 10px;
+  background-color: green;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
+}
+
+.buyticket-show-time:hover {
+  background-color: gold;
+  transform: scale(1.05);
+  color: black;
+}
+
+.buyticket-seating-button-container {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.buyticket-seating-button {
+  padding: 15px 30px;
+  border: none;
+  border-radius: 30px;
+  background-color: #6200ea;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
+}
+
+.buyticket-seating-button:hover {
+  background-color: blue;
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .buyticket-date-selector div {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .buyticket-show-time {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .buyticket-seating-button {
+    font-size: 16px;
+    padding: 12px 24px;
+  }
+}
+/* Calendar styling */
+.buyticket-datepicker-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.buyticket-datepicker {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #6200ea;
+  font-size: 16px;
+  text-align: center;
+  color: #6200ea;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.buyticket-datepicker:hover {
+  background-color: white;
+}
+
+/* Adjust date container spacing */
+.buyticket-date-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+/* Active date style */
+.buyticket-date-selector .active {
+  background-color: #6200ea;
+  color: white;
+  font-weight: bold;
+}
+/* Calendar popup styling */
+.buyticket-calendar-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgb(251, 222, 222);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.buyticket-calendar-content h3 {
+  margin-bottom: 15px;
+  color: #6200ea;
+}
+
+.buyticket-datepicker-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #6200ea;
+  border-radius: 10px;
+  font-size: 16px;
+  color: #6200ea;
+  background-color: white;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.buyticket-datepicker-input:hover {
+  background-color: #ececec;
+}
+
+.buyticket-close-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #6200ea;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
+}
+
+.buyticket-close-button:hover {
+  background-color: #3700b3;
+  transform: scale(1.05);
+}
+
+/* Overlay background when calendar is open */
+
+.buyticket-show-time:disabled {
+  cursor: not-allowed;
+  opacity: 0.5; /* Optional, to visually indicate disabled button */
+}
