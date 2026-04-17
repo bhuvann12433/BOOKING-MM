@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors());
 
-// 🔥 EMAIL TRANSPORTER (GLOBAL)
+// 🔥 EMAIL TRANSPORTER
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -136,7 +136,7 @@ app.post("/book-seat", async (req, res) => {
   }
 });
 
-// 🔥 SAVE BOOKING + EMAIL + PDF
+// 🔥 SAVE BOOKING + EMAIL + PDF (FIXED)
 app.post("/save-booking", async (req, res) => {
   const {
     username,
@@ -151,6 +151,8 @@ app.post("/save-booking", async (req, res) => {
 
   try {
     const booking = await Booking.create(req.body);
+
+    console.log("📩 Sending email to:", email);
 
     const seatText = seats.join(", ");
 
@@ -167,36 +169,41 @@ app.post("/save-booking", async (req, res) => {
     doc.on("data", buffers.push.bind(buffers));
 
     doc.on("end", async () => {
-      const pdfData = Buffer.concat(buffers);
+      try {
+        const pdfData = Buffer.concat(buffers);
 
-      // 🔥 SEND EMAIL
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "🎟️ Your Movie Ticket",
-        html: `
-          <h2>Booking Confirmed 🎉</h2>
-          <p><b>Movie:</b> ${movieTitle}</p>
-          <p><b>Theater:</b> ${theaterName}</p>
-          <p><b>City:</b> ${city}</p>
-          <p><b>Date:</b> ${date}</p>
-          <p><b>Time:</b> ${time}</p>
-          <p><b>Seats:</b> ${seatText}</p>
-          <h3>Total: ₹${total}</h3>
-        `,
-        attachments: [
-          {
-            filename: "ticket.pdf",
-            content: pdfData,
-          },
-        ],
-      });
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: "🎟️ Your Movie Ticket",
+          html: `
+            <h2>Booking Confirmed 🎉</h2>
+            <p><b>Movie:</b> ${movieTitle}</p>
+            <p><b>Theater:</b> ${theaterName}</p>
+            <p><b>City:</b> ${city}</p>
+            <p><b>Date:</b> ${date}</p>
+            <p><b>Time:</b> ${time}</p>
+            <p><b>Seats:</b> ${seatText}</p>
+            <h3>Total: ₹${total}</h3>
+          `,
+          attachments: [
+            {
+              filename: "ticket.pdf",
+              content: pdfData,
+            },
+          ],
+        });
+
+        console.log("✅ Email sent successfully");
+      } catch (err) {
+        console.error("❌ Email failed:", err);
+      }
     });
 
-    // 🔥 PDF CONTENT
+    // PDF content
     doc.fontSize(18).text("Movie Ticket", { align: "center" });
     doc.moveDown();
-    doc.fontSize(12).text(`Movie: ${movieTitle}`);
+    doc.text(`Movie: ${movieTitle}`);
     doc.text(`Theater: ${theaterName}`);
     doc.text(`City: ${city}`);
     doc.text(`Date: ${date}`);
@@ -206,7 +213,7 @@ app.post("/save-booking", async (req, res) => {
 
     doc.end();
 
-    res.json({ message: "Booking + Email Sent ✅", booking });
+    res.json({ message: "Booking saved (email sending...) ✅", booking });
 
   } catch (error) {
     console.error(error);
