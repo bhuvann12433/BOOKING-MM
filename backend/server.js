@@ -4,6 +4,9 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import dotenv from "dotenv";
+import nodemailer from "nodemailer";
+import PDFDocument from "pdfkit";
+
 import Seat from "./models/Seat.js";
 import Booking from "./models/Booking.js";
 
@@ -15,42 +18,18 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors());
 
-const MONGO_URI = process.env.MONGO_URI;
+// 🔥 EMAIL TRANSPORTER (GLOBAL)
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
-if (!MONGO_URI) {
-  console.log("❌ MONGO_URI missing");
-  process.exit(1);
-}
-
-// 🔥 CONNECT DB + INIT SEATS
-mongoose
-  .connect(MONGO_URI)
-  .then(async () => {
-    console.log("MongoDB Connected ✅");
-
-    const count = await Seat.countDocuments();
-
-    if (count === 0) {
-      const seats = [];
-      const sections = ["Sofa", "Chair", "Table"];
-
-      for (const section of sections) {
-        for (let row = 1; row <= 3; row++) {
-          for (let col = 1; col <= 20; col++) {
-            seats.push({
-              section,
-              row,
-              col,
-              booked: false,
-            });
-          }
-        }
-      }
-
-      await Seat.insertMany(seats);
-      console.log("Seats initialized ✅");
-    }
-  })
+// 🔥 DB CONNECT
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected ✅"))
   .catch((err) => console.error(err));
 
 // 🔹 TEST
@@ -91,7 +70,7 @@ app.post("/signup", async (req, res) => {
     );
 
     res.json({ token, username, email });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Signup error" });
   }
 });
@@ -119,7 +98,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// 🔹 GET ALL SEATS
+// 🔹 GET SEATS
 app.get("/seats", async (req, res) => {
   try {
     const seats = await Seat.find().sort({ section: 1, row: 1, col: 1 });
@@ -129,7 +108,7 @@ app.get("/seats", async (req, res) => {
   }
 });
 
-// 🔥 🔥 MULTI-SEAT BOOKING (UPGRADED)
+// 🔹 BOOK SEAT
 app.post("/book-seat", async (req, res) => {
   const { section, row, col } = req.body;
 
@@ -141,37 +120,97 @@ app.post("/book-seat", async (req, res) => {
     });
 
     if (!seat) {
-      return res.status(404).json({
-        error: `Seat not found: ${section}-${row}-${col}`,
-      });
+      return res.status(404).json({ error: "Seat not found" });
     }
 
     if (seat.booked) {
-      return res.status(400).json({
-        error: `Seat already booked: ${section}-${row}-${col}`,
-      });
+      return res.status(400).json({ error: "Seat already booked" });
     }
 
     seat.booked = true;
     await seat.save();
 
-    res.json({
-      message: "Seat booked ✅",
-      seat: `${section}-${row}-${col}`,
-    });
-  } catch (err) {
-    console.error(err);
+    res.json({ message: "Seat booked ✅" });
+  } catch {
     res.status(500).json({ error: "Booking failed" });
   }
 });
 
-// 🔹 SAVE BOOKING
+// 🔥 SAVE BOOKING + EMAIL + PDF
 app.post("/save-booking", async (req, res) => {
+  const {
+    username,
+    email,
+    movieTitle,
+    city,
+    theaterName,
+    date,
+    time,
+    seats,
+  } = req.body;
+
   try {
     const booking = await Booking.create(req.body);
-    res.json({ message: "Booking saved ✅", booking });
-  } catch {
-    res.status(500).json({ error: "Save booking error" });
+
+    const seatText = seats.join(", ");
+
+    const total = seats.reduce((sum, seat) => {
+      if (seat.startsWith("Premium")) return sum + 250;
+      if (seat.startsWith("Executive")) return sum + 200;
+      return sum + 150;
+    }, 0);
+
+    // 🔥 CREATE PDF
+    const doc = new PDFDocument();
+    let buffers = [];
+
+    doc.on("data", buffers.push.bind(buffers));
+
+    doc.on("end", async () => {
+      const pdfData = Buffer.concat(buffers);
+
+      // 🔥 SEND EMAIL
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "🎟️ Your Movie Ticket",
+        html: `
+          <h2>Booking Confirmed 🎉</h2>
+          <p><b>Movie:</b> ${movieTitle}</p>
+          <p><b>Theater:</b> ${theaterName}</p>
+          <p><b>City:</b> ${city}</p>
+          <p><b>Date:</b> ${date}</p>
+          <p><b>Time:</b> ${time}</p>
+          <p><b>Seats:</b> ${seatText}</p>
+          <h3>Total: ₹${total}</h3>
+        `,
+        attachments: [
+          {
+            filename: "ticket.pdf",
+            content: pdfData,
+          },
+        ],
+      });
+    });
+
+    // 🔥 PDF CONTENT
+    doc.fontSize(18).text("Movie Ticket", { align: "center" });
+    doc.moveDown();
+    doc.fontSize(12).text(`Movie: ${movieTitle}`);
+    doc.text(`Theater: ${theaterName}`);
+    doc.text(`City: ${city}`);
+    doc.text(`Date: ${date}`);
+    doc.text(`Time: ${time}`);
+    doc.text(`Seats: ${seatText}`);
+    doc.text(`Total: ₹${total}`);
+
+    doc.end();
+
+    res.json({ message: "Booking + Email Sent ✅", booking });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Booking failed" });
   }
 });
 
@@ -186,12 +225,6 @@ app.get("/booking-history/:username", async (req, res) => {
   } catch {
     res.status(500).json({ error: "History error" });
   }
-});
-
-// 🔹 RESET
-app.put("/reset-seats", async (req, res) => {
-  await Seat.updateMany({}, { booked: false });
-  res.json({ message: "All seats reset ✅" });
 });
 
 // 🔹 START

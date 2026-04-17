@@ -9,6 +9,7 @@ import Searchbar from "./components/Searchbar";
 import ProfilePage from "./components/ProfilePage";
 import BuyTicket from "./components/BuyTicket";
 import Seating from "./components/Seating";
+import Ticket from "./components/Ticket"; // 🔥 ADD THIS
 
 const App = () => {
   return (
@@ -21,8 +22,11 @@ const App = () => {
       <Route path="/ProfilePage" element={<ProfilePage />} />
       <Route path="/BuyTicket" element={<BuyTicket />} />
 
-      {/* ✅ Seat booking route */}
+      {/* Seat Booking */}
       <Route path="/SeatBooking" element={<Seating />} />
+
+      {/* 🔥 Ticket Page (IMPORTANT) */}
+      <Route path="/ticket" element={<Ticket />} />
     </Routes>
   );
 };

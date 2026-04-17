@@ -44,7 +44,7 @@ function HomePage() {
     },
 
     { src: hissab, rating: "4.7", title: "Hissab Barabar", language: "Telugu", cert: "UA13+" },
-    { src: dakuimg1, rating: "4.6", title: "Dacoit", language: "Telugu", cert: "UA13+" },
+    { src: dakuimg1, rating: "4.6", title: "Daku Maharaj", language: "Telugu", cert: "UA13+" },
     { src: second, rating: "4.8", title: "Game Changer", language: "Telugu", cert: "UA13+" },
     { src: virupaksha, rating: "4.7", title: "Virupaksha", language: "Telugu", cert: "UA13+" },
 
