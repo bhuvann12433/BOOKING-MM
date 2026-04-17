@@ -1,4 +1,4 @@
-import "./Homepage.css";
+import "./HomePage.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { FaUser, FaMapMarkerAlt, FaSearch, FaChevronDown } from "react-icons/fa";
@@ -17,7 +17,7 @@ const AP_CITIES = [
   "Vizianagaram", "Tenali", "Proddatur", "Hindupur", "Bhimavaram"
 ];
 
-function Homepage() {
+function HomePage() {
   const navigate = useNavigate();
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [selectedCity, setSelectedCity] = useState("Vijayawada");
