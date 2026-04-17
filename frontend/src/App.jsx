@@ -10,6 +10,7 @@ import ProfilePage from "./components/ProfilePage";
 import BuyTicket from "./components/BuyTicket";
 import Seating from "./components/Seating";
 import Ticket from "./components/Ticket"; // 🔥 ADD THIS
+import SelectLocationPage from "./components/SelectLocationPage";
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
       <Route path="/Searchbar" element={<Searchbar />} />
       <Route path="/ProfilePage" element={<ProfilePage />} />
       <Route path="/BuyTicket" element={<BuyTicket />} />
+      <Route path="/select-location" element={<SelectLocationPage />} />
 
       {/* Seat Booking */}
       <Route path="/SeatBooking" element={<Seating />} />

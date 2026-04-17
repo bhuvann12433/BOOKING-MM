@@ -169,16 +169,12 @@ function HomePage() {
               key={i}
               className="hp-card"
               onClick={() =>
-                navigate("/SeatBooking", {
-                  state: {
-                    ...movie,
-                    movieTitle: movie.title,
-                    city: selectedCity,
-                    theaterName: "PVR Cinemas",
-                    date: "Today",
-                    time: "7:00 PM"
-                  }
-                })
+                navigate("/select-location", {
+  state: {
+    movieTitle: movie.title,
+    city: selectedCity
+  }
+})
               }
             >
               <div
