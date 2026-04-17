@@ -13,10 +13,10 @@ import Seating from "./components/Seating";
 const App = () => {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
+      <Route path="/" element={<HomePage />} />
+      <Route path="/LandingPage" element={<LandingPage />} />
       <Route path="/LoginPage" element={<LoginPage />} />
       <Route path="/SignupPage" element={<SignupPage />} />
-      <Route path="/HomePage" element={<HomePage />} />
       <Route path="/Searchbar" element={<Searchbar />} />
       <Route path="/ProfilePage" element={<ProfilePage />} />
       <Route path="/BuyTicket" element={<BuyTicket />} />

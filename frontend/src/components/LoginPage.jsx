@@ -36,7 +36,7 @@ const LoginPage = () => {
         localStorage.setItem("email", data.email);
 
         alert("Logged in successfully!");
-        navigate("/HomePage");
+        navigate("/");
       } else {
         setError(data.error || "Invalid login credentials");
       }

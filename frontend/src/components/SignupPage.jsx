@@ -67,7 +67,7 @@ const SignupPage = () => {
         localStorage.setItem("token", data.token);
 
         alert("Signed up successfully!");
-        navigate("/HomePage");
+        navigate("/");
       } else {
         setError(data.error || "Signup failed. Please try again.");
       }
