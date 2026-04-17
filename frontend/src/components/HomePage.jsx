@@ -27,10 +27,7 @@ function HomePage() {
 
  useEffect(() => {
   const token = localStorage.getItem("token");
-  if (!token) {
-    console.log("No token found");
-    // navigate("/LoginPage");  // disable for now
-  }
+  if (!token) navigate("/LoginPage");
 }, [navigate]);
 
   const movies = [
