@@ -1,107 +1,84 @@
-.seating-container {
-  display: flex;
+body {
+  margin: 0;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 20% 55% 25%;
   min-height: 100vh;
-  font-family: Arial, sans-serif;
   background: #0f172a;
   color: white;
 }
 
-/* LEFT PANEL */
-.seating-movie-details {
-  width: 28%;
+/* LEFT */
+.left {
   background: linear-gradient(180deg, #4f46e5, #6366f1);
-  padding: 30px;
-  border-radius: 0 20px 20px 0;
-  box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+  padding: 20px;
 }
 
-.seating-movie-details p {
-  margin: 10px 0;
-  font-size: 15px;
-  color: #e0e7ff;
-}
-
-/* RIGHT SIDE */
-.seating-layout {
-  width: 72%;
-  padding: 40px;
+/* CENTER */
+.center {
   text-align: center;
+  padding: 20px;
 }
 
-/* SCREEN */
 .screen {
+  margin: 20px auto;
   width: 60%;
-  margin: 0 auto 40px;
   padding: 10px;
-  background: linear-gradient(to right, #cbd5f5, #e0e7ff);
-  border-radius: 50px;
-  font-size: 14px;
-  color: #333;
-  font-weight: bold;
+  background: white;
+  color: black;
+  border-radius: 20px;
 }
 
-/* SECTION */
-.seating-section {
-  margin-bottom: 25px;
+/* SECTIONS */
+.section {
+  margin-bottom: 20px;
 }
 
-.seating-section-title {
-  margin-bottom: 10px;
-  font-size: 16px;
-  color: #c7d2fe;
-}
-
-/* ROW */
-.seating-rows {
+.row {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin: 5px 0;
 }
 
-/* SEAT STYLE */
-.seat-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  border: 1px solid #94a3b8;
-  background: #e2e8f0;
+/* SEATS */
+.seat {
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  background: #e2e8f0;
 }
 
-.seat-btn:hover:not(:disabled) {
+.seat:hover {
   transform: scale(1.1);
 }
 
-/* STATES */
-.seat-available {
-  background: #e2e8f0;
+.seat.selected {
+  background: #6366f1;
 }
 
-.seat-selected {
-  background: #4f46e5;
-  border-color: #4f46e5;
-}
-
-.seat-booked {
-  background: #9ca3af;
+.seat.booked {
+  background: gray;
   cursor: not-allowed;
 }
 
-/* BUTTON */
-.seating-book-button {
-  margin-top: 30px;
-  padding: 12px 30px;
-  border-radius: 30px;
-  border: none;
-  background: #4f46e5;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  transition: 0.3s;
+/* RIGHT */
+.right {
+  background: #1e293b;
+  padding: 20px;
 }
 
-.seating-book-button:hover {
-  background: #4338ca;
+.right button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  border-radius: 25px;
+  border: none;
+  background: #6366f1;
+  color: white;
+  cursor: pointer;
 }

@@ -7,11 +7,13 @@ function ProfilePage() {
   const [bookingHistory, setBookingHistory] = useState([]);
   const username = localStorage.getItem("username");
 
+  const API = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchBookingHistory = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/booking-history/${username}`,
+          `${API}/booking-history/${username}`,
         );
         setBookingHistory(response.data);
       } catch (error) {

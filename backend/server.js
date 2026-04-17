@@ -12,19 +12,17 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ Strict ENV usage (no fallback)
-const MONGO_URI = process.env.MONGO_URI;
-
-if (!MONGO_URI) {
-  console.log("❌ MONGO_URI not found in .env");
-  process.exit(1);
-}
-
-// Middleware
 app.use(express.json());
 app.use(cors());
 
-// Connect MongoDB
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  console.log("❌ MONGO_URI missing");
+  process.exit(1);
+}
+
+// 🔥 CONNECT DB + INIT SEATS
 mongoose
   .connect(MONGO_URI)
   .then(async () => {
@@ -33,15 +31,13 @@ mongoose
     const count = await Seat.countDocuments();
 
     if (count === 0) {
-      const allSeats = [];
+      const seats = [];
       const sections = ["Sofa", "Chair", "Table"];
-      const totalRows = 5;
-      const totalCols = 20;
 
       for (const section of sections) {
-        for (let row = 1; row <= totalRows; row++) {
-          for (let col = 1; col <= totalCols; col++) {
-            allSeats.push({
+        for (let row = 1; row <= 3; row++) {
+          for (let col = 1; col <= 20; col++) {
+            seats.push({
               section,
               row,
               col,
@@ -51,158 +47,89 @@ mongoose
         }
       }
 
-      await Seat.insertMany(allSeats);
-      console.log("All 300 seats inserted successfully ✅");
-    } else {
-      console.log(`Seats already exist: ${count}`);
+      await Seat.insertMany(seats);
+      console.log("Seats initialized ✅");
     }
   })
-  .catch((err) => {
-    console.error("MongoDB Connection Error ❌:", err.message);
-  });
+  .catch((err) => console.error(err));
 
-// Test route
+// 🔹 TEST
 app.get("/", (req, res) => {
-  res.send("Backend working 🚀");
+  res.send("Server running 🚀");
 });
 
-// User Schema
-const userSchema = new mongoose.Schema({
-  username: String,
-  email: { type: String, unique: true },
-  password: String,
-});
+// 🔹 USER MODEL
+const User = mongoose.model(
+  "User",
+  new mongoose.Schema({
+    username: String,
+    email: { type: String, unique: true },
+    password: String,
+  })
+);
 
-const User = mongoose.model("User", userSchema);
-
-// Signup
+// 🔹 SIGNUP
 app.post("/signup", async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
-    const existingUser = await User.findOne({ email });
+    const exists = await User.findOne({ email });
+    if (exists) return res.status(400).json({ error: "User exists" });
 
-    if (existingUser) {
-      return res.status(400).json({ error: "User already exists" });
-    }
+    const hashed = await bcrypt.hash(password, 10);
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new User({
+    const user = await User.create({
       username,
       email,
-      password: hashedPassword,
+      password: hashed,
     });
 
-    await newUser.save();
-
     const token = jwt.sign(
-      { id: newUser._id },
-      process.env.JWT_SECRET || "secret_key",
+      { id: user._id },
+      process.env.JWT_SECRET || "secret",
       { expiresIn: "1h" }
     );
 
-    res.status(201).json({
-      username: newUser.username,
-      email: newUser.email,
-      token,
-      message: "Signup successful",
-    });
-  } catch (error) {
-    console.error("Signup Error:", error);
-    res.status(500).json({ error: "Error signing up" });
+    res.json({ token, username, email });
+  } catch (err) {
+    res.status(500).json({ error: "Signup error" });
   }
 });
 
-// Login
+// 🔹 LOGIN
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
     const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: "User not found" });
 
-    if (!user) {
-      return res.status(400).json({ error: "User not found" });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res.status(400).json({ error: "Invalid credentials" });
-    }
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(400).json({ error: "Invalid password" });
 
     const token = jwt.sign(
       { id: user._id },
-      process.env.JWT_SECRET || "secret_key",
+      process.env.JWT_SECRET || "secret",
       { expiresIn: "1h" }
     );
 
-    res.status(200).json({
-      token,
-      username: user.username,
-      email: user.email,
-      message: "Login successful",
-    });
-  } catch (error) {
-    console.error("Login Error:", error);
-    res.status(500).json({ error: "Error logging in" });
+    res.json({ token, username: user.username, email });
+  } catch {
+    res.status(500).json({ error: "Login error" });
   }
 });
 
-// Save booking
-app.post("/save-booking", async (req, res) => {
-  const { username, email, movieTitle, city, theaterName, date, time, seats } =
-    req.body;
-
-  try {
-    const newBooking = new Booking({
-      username,
-      email,
-      movieTitle,
-      city,
-      theaterName,
-      date,
-      time,
-      seats,
-    });
-
-    await newBooking.save();
-
-    res.status(201).json({
-      message: "Booking saved successfully ✅",
-      booking: newBooking,
-    });
-  } catch (error) {
-    console.error("Save Booking Error:", error);
-    res.status(500).json({ error: "Error saving booking" });
-  }
-});
-
-// Fetch booking history
-app.get("/booking-history/:username", async (req, res) => {
-  const { username } = req.params;
-
-  try {
-    const bookings = await Booking.find({ username }).sort({ createdAt: -1 });
-    res.status(200).json(bookings);
-  } catch (error) {
-    console.error("Fetch Booking History Error:", error);
-    res.status(500).json({ error: "Error fetching booking history" });
-  }
-});
-
-// Get all seats
+// 🔹 GET ALL SEATS
 app.get("/seats", async (req, res) => {
   try {
     const seats = await Seat.find().sort({ section: 1, row: 1, col: 1 });
-    res.status(200).json(seats);
-  } catch (error) {
-    console.error("Fetch Seats Error:", error);
-    res.status(500).json({ error: "Error fetching seats" });
+    res.json(seats);
+  } catch {
+    res.status(500).json({ error: "Seat fetch error" });
   }
 });
 
-// Book seat
+// 🔥 🔥 MULTI-SEAT BOOKING (UPGRADED)
 app.post("/book-seat", async (req, res) => {
   const { section, row, col } = req.body;
 
@@ -220,37 +147,54 @@ app.post("/book-seat", async (req, res) => {
     }
 
     if (seat.booked) {
-      return res.status(400).json({ error: "Seat already booked" });
+      return res.status(400).json({
+        error: `Seat already booked: ${section}-${row}-${col}`,
+      });
     }
 
     seat.booked = true;
     await seat.save();
 
-    const seatId = `${seat.section}-${seat.row}-${seat.col}`;
-
-    res.status(200).json({
-      message: "Seat booked successfully ✅",
-      seatId,
-      seat,
+    res.json({
+      message: "Seat booked ✅",
+      seat: `${section}-${row}-${col}`,
     });
-  } catch (error) {
-    console.error("Book Seat Error:", error);
-    res.status(500).json({ error: "Error booking seat" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Booking failed" });
   }
 });
 
-// Reset seats
-app.put("/reset-seats", async (req, res) => {
+// 🔹 SAVE BOOKING
+app.post("/save-booking", async (req, res) => {
   try {
-    await Seat.updateMany({}, { $set: { booked: false } });
-    res.status(200).json({ message: "All seats reset successfully ✅" });
-  } catch (error) {
-    console.error("Reset Seats Error:", error);
-    res.status(500).json({ error: "Error resetting seats" });
+    const booking = await Booking.create(req.body);
+    res.json({ message: "Booking saved ✅", booking });
+  } catch {
+    res.status(500).json({ error: "Save booking error" });
   }
 });
 
-// Start server
+// 🔹 HISTORY
+app.get("/booking-history/:username", async (req, res) => {
+  try {
+    const data = await Booking.find({
+      username: req.params.username,
+    }).sort({ createdAt: -1 });
+
+    res.json(data);
+  } catch {
+    res.status(500).json({ error: "History error" });
+  }
+});
+
+// 🔹 RESET
+app.put("/reset-seats", async (req, res) => {
+  await Seat.updateMany({}, { booked: false });
+  res.json({ message: "All seats reset ✅" });
+});
+
+// 🔹 START
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Seating.css";
 import { useLocation } from "react-router-dom";
-<div className="screen">SCREEN THIS SIDE</div>
 
 const Seating = () => {
   const location = useLocation();
@@ -12,18 +11,42 @@ const Seating = () => {
   const [bookedSeats, setBookedSeats] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const API = import.meta.env.VITE_API_URL;
+
+  // 🔹 Mapping frontend → backend
+  const categoryMap = {
+    Premium: "Sofa",
+    Executive: "Chair",
+    Normal: "Table",
+  };
+
+  const categoryShort = {
+    Premium: "P",
+    Executive: "E",
+    Normal: "N",
+  };
+
+  // 🔹 Fetch seats
   const fetchSeats = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/seats");
-      const updatedSeats = response.data;
+      const res = await axios.get(`${API}/seats`);
 
-      const bookedSeatIds = updatedSeats
-        .filter((seat) => seat.booked)
-        .map((seat) => `${seat.section}-${seat.row}-${seat.col}`);
+      const booked = res.data
+        .filter((s) => s.booked)
+        .map((s) => {
+          const frontendCategory =
+            s.section === "Sofa"
+              ? "Premium"
+              : s.section === "Chair"
+              ? "Executive"
+              : "Normal";
 
-      setBookedSeats(bookedSeatIds);
-    } catch (error) {
-      console.error("Error fetching seats:", error);
+          return `${frontendCategory}-${s.row}-${s.col}`;
+        });
+
+      setBookedSeats(booked);
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -33,43 +56,36 @@ const Seating = () => {
     fetchSeats();
   }, []);
 
-  const toggleSeatSelection = (seat) => {
-    const seatId = `${seat.section}-${seat.row}-${seat.col}`;
+  // 🔹 Select / Deselect
+  const toggleSeatSelection = (category, row, col) => {
+    const seatId = `${category}-${row}-${col}`;
 
     if (bookedSeats.includes(seatId)) return;
 
     setSelectedSeats((prev) =>
       prev.includes(seatId)
-        ? prev.filter((id) => id !== seatId)
-        : [...prev, seatId],
+        ? prev.filter((s) => s !== seatId)
+        : [...prev, seatId]
     );
   };
 
+  // 🔹 Booking
   const bookSeats = async () => {
-    if (selectedSeats.length === 0) {
-      alert("Please select at least one seat");
-      return;
-    }
-
     try {
       for (const seatId of selectedSeats) {
-        const [section, row, col] = seatId.split("-");
+        const [category, row, col] = seatId.split("-");
+        const section = categoryMap[category];
 
-        console.log("Booking seat:", { section, row, col });
-
-        await axios.post("http://localhost:5000/book-seat", {
+        await axios.post(`${API}/book-seat`, {
           section,
           row: Number(row),
           col: Number(col),
         });
       }
 
-      const username = localStorage.getItem("username");
-      const email = localStorage.getItem("email");
-
-      await axios.post("http://localhost:5000/save-booking", {
-        username,
-        email,
+      await axios.post(`${API}/save-booking`, {
+        username: localStorage.getItem("username"),
+        email: localStorage.getItem("email"),
         movieTitle,
         city,
         theaterName,
@@ -78,53 +94,57 @@ const Seating = () => {
         seats: selectedSeats,
       });
 
-      alert("Seats booked successfully ✅");
+      alert("Booking Successful ✅");
       setSelectedSeats([]);
       fetchSeats();
-    } catch (error) {
-      console.error("Error booking seats:", error);
-      console.log("Backend response:", error.response?.data);
-      alert(
-        error?.response?.data?.error ||
-          "Failed to book seats. Please try again.",
-      );
+    } catch (err) {
+      console.error(err);
+      alert("Booking failed");
     }
   };
 
-  const renderSeats = (category, rate, rows) => (
-    <div className="seating-section">
-      <h3 className="seating-section-title">
-        {category} - Rs. {rate}
-      </h3>
+  // 🔹 Seat price
+  const getPrice = (category) => {
+    if (category === "Premium") return 250;
+    if (category === "Executive") return 200;
+    return 150;
+  };
 
-      {Array.from({ length: rows }).map((_, rowIndex) => (
-        <div key={rowIndex} className="seating-rows">
-          {Array.from({ length: 20 }).map((_, colIndex) => {
-            const seatId = `${category}-${rowIndex + 1}-${colIndex + 1}`;
+  const totalPrice = selectedSeats.reduce((sum, seat) => {
+    const [category] = seat.split("-");
+    return sum + getPrice(category);
+  }, 0);
+
+  const formattedSeats = selectedSeats.map((seat) => {
+    const [category, row, col] = seat.split("-");
+    return `${categoryShort[category]}${row}-${col}`;
+  });
+
+  // 🔹 Render seats
+  const renderSeats = (category, price, rows) => (
+    <div className="section">
+      <h3>{category} ₹{price}</h3>
+
+      {Array.from({ length: rows }).map((_, r) => (
+        <div className="row" key={r}>
+          {Array.from({ length: 20 }).map((_, c) => {
+            const seatId = `${category}-${r + 1}-${c + 1}`;
             const isSelected = selectedSeats.includes(seatId);
             const isBooked = bookedSeats.includes(seatId);
 
             return (
               <button
                 key={seatId}
-                type="button"
-                onClick={() =>
-                  toggleSeatSelection({
-                    section: category,
-                    row: rowIndex + 1,
-                    col: colIndex + 1,
-                  })
-                }
                 disabled={isBooked}
-                className={`seat-btn ${
-                  isBooked
-                    ? "seat-booked"
-                    : isSelected
-                      ? "seat-selected"
-                      : "seat-available"
-                }`}
+                onClick={() =>
+                  toggleSeatSelection(category, r + 1, c + 1)
+                }
+                className={`seat 
+                  ${isBooked ? "booked" : ""}
+                  ${isSelected ? "selected" : ""}
+                `}
               >
-                {colIndex + 1}
+                {c + 1}
               </button>
             );
           })}
@@ -134,57 +154,52 @@ const Seating = () => {
   );
 
   return (
-    <div className="seating-container">
-      <h1 className="seating-main-title">Movie Ticket Booking</h1>
+    <div className="container">
 
-      <div className="seating-movie-details">
-        <p>
-          <strong>Movie:</strong> {movieTitle || "N/A"}
-        </p>
-        <p>
-          <strong>City:</strong> {city || "N/A"}
-        </p>
-        <p>
-          <strong>Theater:</strong> {theaterName || "N/A"}
-        </p>
-        <p>
-          <strong>Date:</strong> {date || "N/A"}
-        </p>
-        <p>
-          <strong>Time:</strong> {time || "N/A"}
-        </p>
+      {/* LEFT */}
+      <div className="left">
+        <h2>{movieTitle}</h2>
+        <p>{city}</p>
+        <p>{theaterName}</p>
+        <p>{date}</p>
+        <p>{time}</p>
       </div>
 
-      {loading ? (
-        <p className="seating-loading">Loading seats...</p>
-      ) : (
-        <div className="seating-layout">
+      {/* CENTER */}
+      <div className="center">
+        <div className="screen">SCREEN THIS SIDE</div>
 
-  <div className="screen">SCREEN THIS SIDE</div>
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <>
+            {renderSeats("Premium", 250, 3)}
+            {renderSeats("Executive", 200, 3)}
+            {renderSeats("Normal", 150, 3)}
+          </>
+        )}
+      </div>
 
-  {renderSeats("Premium", 250, 3)}
-  {renderSeats("Executive", 200, 3)}
-  {renderSeats("Normal", 150, 3)}
+      {/* RIGHT */}
+      <div className="right">
+        <h3>{selectedSeats.length} Seats Selected</h3>
 
-</div>
-      )}
-
-      <div className="seating-selection">
-        <h2 className="seating-selection-title">Selected Seats</h2>
-        <p className="seating-selected-seats">
-          {selectedSeats.length > 0
-            ? selectedSeats.join(", ")
+        <p>
+          {selectedSeats.length
+            ? formattedSeats.join(", ")
             : "No seats selected"}
         </p>
 
+        <h4>Total: ₹{totalPrice}</h4>
+
         <button
+          disabled={!selectedSeats.length}
           onClick={bookSeats}
-          disabled={selectedSeats.length === 0}
-          className="seating-book-button"
         >
-          Book Seats
+          Book Now
         </button>
       </div>
+
     </div>
   );
 };
