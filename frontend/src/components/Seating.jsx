@@ -3,6 +3,24 @@ import axios from "axios";
 import "./Seating.css";
 import { useLocation } from "react-router-dom";
 
+// 🔹 Convert date strings to DD/MM/YYYY format
+const getFormattedDate = (dateStr) => {
+  if (!dateStr) return dateStr;
+
+  if (dateStr === "Today") {
+    return new Date().toLocaleDateString("en-GB");
+  }
+
+  if (dateStr === "Tomorrow") {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toLocaleDateString("en-GB");
+  }
+
+  // If already a date, return as-is
+  return dateStr;
+};
+
 const Seating = () => {
   const location = useLocation();
   const { date, time, movieTitle, city, theaterName } = location.state || {};
@@ -89,7 +107,7 @@ const Seating = () => {
         movieTitle,
         city,
         theaterName,
-        date,
+        date: getFormattedDate(date),
         time,
         seats: selectedSeats,
       });
