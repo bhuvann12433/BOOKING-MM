@@ -1,0 +1,70 @@
+{
+  "Vijayawada": [
+    { "name": "PVR Cinemas (Ripples Mall)", "shows": ["10:00 AM", "1:30 PM", "6:30 PM", "9:45 PM"] },
+    { "name": "INOX (LEPL Centro)", "shows": ["11:00 AM", "3:00 PM", "7:00 PM"] },
+    { "name": "Trendset Mall Multiplex", "shows": ["10:30 AM", "2:15 PM", "6:45 PM"] },
+    { "name": "Raj & Yuvaraj Theatres", "shows": ["11:30 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Guntur": [
+    { "name": "PVR (Forum Mall)", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Swamy Theatre", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] },
+    { "name": "Hollywood Theatre", "shows": ["10:30 AM", "2:30 PM", "6:30 PM"] }
+  ],
+  "Narasaraopet": [
+    { "name": "Eswar Mahal", "shows": ["11:00 AM", "3:00 PM", "8:00 PM"] },
+    { "name": "Sri Srinivasa Theatre", "shows": ["10:30 AM", "2:30 PM", "7:30 PM"] }
+  ],
+  "Visakhapatnam": [
+    { "name": "INOX (CMBT)", "shows": ["10:00 AM", "1:30 PM", "6:00 PM", "9:30 PM"] },
+    { "name": "PVR (Cinepolis Vizag)", "shows": ["11:00 AM", "3:00 PM", "7:30 PM"] },
+    { "name": "Jagadamba Theatre", "shows": ["10:30 AM", "2:30 PM", "8:30 PM"] }
+  ],
+  "Tirupati": [
+    { "name": "PVR Cinemas", "shows": ["10:00 AM", "2:00 PM", "6:30 PM"] },
+    { "name": "Pratap Theatre", "shows": ["11:30 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Nellore": [
+    { "name": "S2 Cinemas", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Archana Theatre", "shows": ["11:00 AM", "3:00 PM", "8:00 PM"] }
+  ],
+  "Kurnool": [
+    { "name": "PVR Cinemas", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Anand Theatre", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Rajahmundry": [
+    { "name": "INOX Cinemas", "shows": ["10:00 AM", "1:30 PM", "6:30 PM"] },
+    { "name": "Geetha Apsara Theatre", "shows": ["11:30 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Kakinada": [
+    { "name": "INOX SRMT Mall", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Devi Theatre", "shows": ["11:00 AM", "3:00 PM", "8:00 PM"] }
+  ],
+  "Eluru": [
+    { "name": "Ambica Theatre", "shows": ["11:00 AM", "3:00 PM", "8:00 PM"] },
+    { "name": "Satyanarayana Theatre", "shows": ["10:30 AM", "2:30 PM", "7:30 PM"] }
+  ],
+
+  "Hyderabad": [
+    { "name": "AMB Cinemas", "shows": ["10:00 AM", "1:30 PM", "6:30 PM", "10:00 PM"] },
+    { "name": "Prasads IMAX", "shows": ["9:00 AM", "2:00 PM", "8:00 PM"] },
+    { "name": "PVR Nexus Mall", "shows": ["10:30 AM", "2:30 PM", "7:30 PM"] },
+    { "name": "INOX GVK One", "shows": ["11:00 AM", "3:30 PM", "9:30 PM"] },
+    { "name": "Asian Cinemas (Ameerpet)", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] }
+  ],
+  "Warangal": [
+    { "name": "Asian Sridevi Mall", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Kakatiya Theatre", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Khammam": [
+    { "name": "SVC Cinemas", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Nartaki Theatre", "shows": ["11:30 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Karimnagar": [
+    { "name": "Asian Sridevi Multiplex", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Venkateshwara Theatre", "shows": ["11:00 AM", "3:00 PM", "8:00 PM"] }
+  ],
+  "Nizamabad": [
+    { "name": "Asian Mukunda Cinemas", "shows": ["10:30 AM", "2:30 PM", "7:30 PM"] },
+    { "name": "Rama Theatre", "shows": ["11:30 AM", "3:30 PM", "8:30 PM"] }
+  ]
+}

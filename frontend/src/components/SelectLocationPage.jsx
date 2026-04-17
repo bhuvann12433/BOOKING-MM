@@ -2,26 +2,23 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./SelectLocationPage.css";
 
-const data = {
-  Vijayawada: [
-    { name: "PVR Cinemas", shows: ["10:00 AM", "2:00 PM", "7:00 PM"] },
-    { name: "INOX", shows: ["11:00 AM", "3:00 PM", "9:00 PM"] },
-  ],
-  Narasaraopet: [
-    { name: "Eswar Mahal", shows: ["11:00 AM", "3:00 PM", "8:00 PM"] },
-  ],
-};
+import data from "../data/theatres.json"; // 🔥 USE JSON
 
 function SelectLocationPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedCity, setSelectedCity] = useState("");
   const [selectedTheatre, setSelectedTheatre] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [selectedDate, setSelectedDate] = useState("Today");
+  const [search, setSearch] = useState("");
 
   const dates = ["Today", "Tomorrow", "18 Apr", "19 Apr"];
+
+  const filteredCities = Object.keys(data).filter((city) =>
+    city.toLowerCase().includes(search.toLowerCase())
+  );
 
   const handleNext = () => {
     if (!selectedCity || !selectedTheatre || !selectedTime) return;
@@ -42,14 +39,22 @@ function SelectLocationPage() {
 
       <h2 className="sl-title">🎬 {state.movieTitle}</h2>
 
-      {/* CITY */}
+      {/* 🔥 CITY SEARCH */}
       <div className="sl-section">
         <h3>Select City</h3>
-        <div className="sl-row">
-          {Object.keys(data).map((city) => (
-            <button
+
+        <input
+          className="sl-search"
+          placeholder="Search city..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <div className="sl-grid">
+          {filteredCities.map((city) => (
+            <div
               key={city}
-              className={`sl-btn ${selectedCity === city ? "active" : ""}`}
+              className={`sl-card ${selectedCity === city ? "active" : ""}`}
               onClick={() => {
                 setSelectedCity(city);
                 setSelectedTheatre(null);
@@ -57,7 +62,7 @@ function SelectLocationPage() {
               }}
             >
               {city}
-            </button>
+            </div>
           ))}
         </div>
       </div>
@@ -127,13 +132,13 @@ function SelectLocationPage() {
         </div>
       )}
 
-      {/* NEXT BUTTON */}
+      {/* NEXT */}
       <button
         className="sl-next"
         disabled={!selectedTime}
         onClick={handleNext}
       >
-        Continue to Seat Booking →
+        Continue →
       </button>
     </div>
   );
