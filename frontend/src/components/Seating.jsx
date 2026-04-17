@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Seating.css";
 import { useLocation } from "react-router-dom";
+<div className="screen">SCREEN THIS SIDE</div>
 
 const Seating = () => {
   const location = useLocation();
@@ -158,10 +159,14 @@ const Seating = () => {
         <p className="seating-loading">Loading seats...</p>
       ) : (
         <div className="seating-layout">
-          {renderSeats("Sofa", 200, 5)}
-          {renderSeats("Chair", 150, 5)}
-          {renderSeats("Table", 100, 5)}
-        </div>
+
+  <div className="screen">SCREEN THIS SIDE</div>
+
+  {renderSeats("Premium", 250, 3)}
+  {renderSeats("Executive", 200, 3)}
+  {renderSeats("Normal", 150, 3)}
+
+</div>
       )}
 
       <div className="seating-selection">
