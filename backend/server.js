@@ -6,6 +6,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 import PDFDocument from "pdfkit";
+import QRCode from "qrcode"; // 🔥 NEW
 
 import Seat from "./models/Seat.js";
 import Booking from "./models/Booking.js";
@@ -119,13 +120,8 @@ app.post("/book-seat", async (req, res) => {
       col: Number(col),
     });
 
-    if (!seat) {
-      return res.status(404).json({ error: "Seat not found" });
-    }
-
-    if (seat.booked) {
-      return res.status(400).json({ error: "Seat already booked" });
-    }
+    if (!seat) return res.status(404).json({ error: "Seat not found" });
+    if (seat.booked) return res.status(400).json({ error: "Seat already booked" });
 
     seat.booked = true;
     await seat.save();
@@ -136,7 +132,7 @@ app.post("/book-seat", async (req, res) => {
   }
 });
 
-// 🔥 SAVE BOOKING + EMAIL + PDF (FIXED)
+// 🔥 SAVE BOOKING + EMAIL + QR PDF (FINAL)
 app.post("/save-booking", async (req, res) => {
   const {
     username,
@@ -162,7 +158,11 @@ app.post("/save-booking", async (req, res) => {
       return sum + 150;
     }, 0);
 
-    // 🔥 CREATE PDF
+    // 🔥 GENERATE QR
+    const qrData = await QRCode.toDataURL(
+      `${movieTitle} | ${theaterName} | ${date} ${time} | Seats: ${seatText}`
+    );
+
     const doc = new PDFDocument();
     let buffers = [];
 
@@ -177,14 +177,19 @@ app.post("/save-booking", async (req, res) => {
           to: email,
           subject: "🎟️ Your Movie Ticket",
           html: `
-            <h2>Booking Confirmed 🎉</h2>
-            <p><b>Movie:</b> ${movieTitle}</p>
-            <p><b>Theater:</b> ${theaterName}</p>
-            <p><b>City:</b> ${city}</p>
-            <p><b>Date:</b> ${date}</p>
-            <p><b>Time:</b> ${time}</p>
-            <p><b>Seats:</b> ${seatText}</p>
-            <h3>Total: ₹${total}</h3>
+            <div style="font-family: Arial; padding: 20px;">
+              <h2 style="color:#4f46e5;">🎬 Booking Confirmed</h2>
+
+              <p><b>Movie:</b> ${movieTitle}</p>
+              <p><b>Theater:</b> ${theaterName}</p>
+              <p><b>City:</b> ${city}</p>
+              <p><b>Date:</b> ${date}</p>
+              <p><b>Time:</b> ${time}</p>
+              <p><b>Seats:</b> ${seatText}</p>
+
+              <h3 style="color:green;">Total: ₹${total}</h3>
+              <p>🍿 Enjoy your show!</p>
+            </div>
           `,
           attachments: [
             {
@@ -200,20 +205,36 @@ app.post("/save-booking", async (req, res) => {
       }
     });
 
-    // PDF content
-    doc.fontSize(18).text("Movie Ticket", { align: "center" });
+    // 🔥 PDF DESIGN
+    doc.fontSize(20).fillColor("#4f46e5").text("🎟️ Movie Ticket", {
+      align: "center",
+    });
+
     doc.moveDown();
+    doc.fillColor("black").fontSize(12);
+
     doc.text(`Movie: ${movieTitle}`);
     doc.text(`Theater: ${theaterName}`);
     doc.text(`City: ${city}`);
     doc.text(`Date: ${date}`);
     doc.text(`Time: ${time}`);
     doc.text(`Seats: ${seatText}`);
-    doc.text(`Total: ₹${total}`);
+
+    doc.moveDown();
+    doc.fillColor("green").text(`Total: ₹${total}`);
+
+    doc.moveDown();
+
+    // 🔥 QR ADD
+    const qrImage = qrData.replace(/^data:image\/png;base64,/, "");
+    doc.image(Buffer.from(qrImage, "base64"), {
+      fit: [120, 120],
+      align: "center",
+    });
 
     doc.end();
 
-    res.json({ message: "Booking saved (email sending...) ✅", booking });
+    res.json({ message: "Booking + Email Sent ✅", booking });
 
   } catch (error) {
     console.error(error);
