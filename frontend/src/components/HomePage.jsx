@@ -25,10 +25,13 @@ function HomePage() {
   const [activeTab, setActiveTab] = useState("Movies");
   const [hovered, setHovered] = useState(null);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) navigate("/LoginPage");
-  }, [navigate]);
+ useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    console.log("No token found");
+    // navigate("/LoginPage");  // disable for now
+  }
+}, [navigate]);
 
   const movies = [
     { src: first, rating: "4.8", title: "Sankranti ki Vastunnam", language: "Telugu", cert: "UA13+" },
