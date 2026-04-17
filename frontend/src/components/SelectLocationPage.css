@@ -21,6 +21,8 @@
   top: -100px;
   left: -100px;
   animation: float 10s infinite alternate;
+  pointer-events: none;
+  z-index: 0;
 }
 
 @keyframes float {
@@ -73,6 +75,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 /* 🏙 CITY CARD */
@@ -82,12 +86,19 @@
   text-align: center;
   background: rgba(255,255,255,0.05);
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border: 1px solid rgba(56,189,248,0.3);
 }
 
 .sl-card:hover {
   transform: translateY(-5px);
   background: rgba(56,189,248,0.15);
+  border-color: rgba(56,189,248,0.8);
+}
+
+.sl-card:active {
+  transform: translateY(-2px) scale(0.98);
+  background: rgba(56,189,248,0.25);
 }
 
 .sl-card.active {
