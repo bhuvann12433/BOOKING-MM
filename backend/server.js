@@ -49,6 +49,7 @@ import bookingRoutes from './routes/bookingRoutes.js';
 import movieRoutes from './routes/movies.js';
 import theatreRoutes from './routes/theatres.js';
 import showRoutes from './routes/shows.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 // ============================================
 // IMPORT MIDDLEWARE
@@ -215,6 +216,24 @@ app.use('/seats', seatRoutes);
  * - PUT /bookings/:id/cancel
  */
 app.use('/bookings', bookingRoutes);
+
+/**
+ * Admin Management Routes
+ * Base: /api/admin
+ * - POST /api/admin/movies
+ * - PUT /api/admin/movies/:id
+ * - DELETE /api/admin/movies/:id
+ * - POST /api/admin/theatres
+ * - PUT /api/admin/theatres/:id
+ * - DELETE /api/admin/theatres/:id
+ * - POST /api/admin/shows
+ * - PUT /api/admin/shows/:id
+ * - DELETE /api/admin/shows/:id
+ * - POST /api/admin/seats/create
+ * - GET /api/admin/seats/:showId
+ * - PUT /api/admin/seats/:showId/layout
+ */
+app.use('/api/admin', adminRoutes);
 
 /**
  * LEGACY ROUTE COMPATIBILITY

@@ -21,7 +21,8 @@
     "nodemailer": "^8.0.5",
     "nodemon": "^3.1.9",
     "pdfkit": "^0.18.0",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.3"
   },
   "keywords": [],
   "description": ""
