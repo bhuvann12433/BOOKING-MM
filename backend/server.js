@@ -1,261 +1,290 @@
-import express from "express";
-import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import cors from "cors";
-import dotenv from "dotenv";
-import nodemailer from "nodemailer";
-import PDFDocument from "pdfkit";
-import QRCode from "qrcode"; // 🔥 NEW
+/**
+ * 🎬 MOVIE BOOKING SYSTEM - REFACTORED BACKEND
+ *
+ * Architecture:
+ * ├── config/        - Database and email configuration
+ * ├── models/        - Mongoose schemas (User, Movie, Theatre, Show, Seat, Booking)
+ * ├── controllers/   - Business logic separated from routes
+ * ├── routes/        - Clean API endpoints
+ * └── middleware/    - Error handling and utilities
+ *
+ * Benefits of this structure:
+ * ✅ Clean separation of concerns
+ * ✅ Easy to test and maintain
+ * ✅ Scalable for future features
+ * ✅ Backward compatible with existing frontend
+ */
 
-import Seat from "./models/Seat.js";
-import Booking from "./models/Booking.js";
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import http from 'http';
+import { Server as SocketIOServer } from 'socket.io';
+
+// ============================================
+// INITIALIZE ENVIRONMENT
+// ============================================
 
 dotenv.config();
+
+// ============================================
+// IMPORT CONFIGURATION
+// ============================================
+
+import connectDB from './config/database.js';
+
+// ============================================
+// IMPORT SOCKET.IO HANDLERS
+// ============================================
+
+import initializeSocketHandlers, { cleanupExpiredLocks } from './socket/socketHandlers.js';
+
+// ============================================
+// IMPORT ROUTES
+// ============================================
+
+import authRoutes from './routes/authRoutes.js';
+import seatRoutes from './routes/seatRoutes.js';
+import bookingRoutes from './routes/bookingRoutes.js';
+import movieRoutes from './routes/movies.js';
+import theatreRoutes from './routes/theatres.js';
+import showRoutes from './routes/shows.js';
+
+// ============================================
+// IMPORT MIDDLEWARE
+// ============================================
+
+import { errorHandler, notFound } from './middleware/errorHandler.js';
+
+// ============================================
+// APP INITIALIZATION
+// ============================================
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// ============================================
+// MIDDLEWARE SETUP
+// ============================================
+
+// Parse JSON request bodies
 app.use(express.json());
+
+// Enable Cross-Origin Resource Sharing (CORS)
 app.use(cors());
 
-// 🔥 EMAIL TRANSPORTER
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+// ============================================
+// DATABASE CONNECTION
+// ============================================
+
+// Connect to MongoDB Atlas
+connectDB();
+
+// ============================================
+// API ROUTES
+// ============================================
+
+/**
+ * Root Endpoint
+ * Returns API information and available endpoints
+ */
+app.get('/', (req, res) => {
+  res.json({
+    message: '🎬 Movie Booking System API',
+    version: '2.0.0',
+    status: 'running ✅',
+    endpoints: {
+      auth: {
+        signup: 'POST /auth/signup',
+        login: 'POST /auth/login',
+      },
+      movies: {
+        getAll: 'GET /api/movies',
+        getById: 'GET /api/movies/:id',
+        create: 'POST /api/movies',
+        update: 'PUT /api/movies/:id',
+        delete: 'DELETE /api/movies/:id',
+      },
+      theatres: {
+        getAll: 'GET /api/theatres',
+        getByCity: 'GET /api/theatres/city/:city',
+        getByCityAndMovie: 'GET /api/theatres?city=cityName&movieId=movieId',
+        getCities: 'GET /api/theatres/cities',
+        getById: 'GET /api/theatres/:id',
+        create: 'POST /api/theatres',
+        update: 'PUT /api/theatres/:id',
+      },
+      shows: {
+        getAll: 'GET /api/shows',
+        getByMovieAndTheatre: 'GET /api/shows?movieId=movieId&theatreId=theatreId',
+        getById: 'GET /api/shows/:id',
+        getByTheatre: 'GET /api/shows/theatre/:theatreId',
+        create: 'POST /api/shows',
+        update: 'PUT /api/shows/:id',
+      },
+      seats: {
+        getAll: 'GET /seats',
+        bookSeat: 'POST /seats/book',
+        layout: 'GET /seats/layout/:showId',
+        available: 'GET /seats/available/:showId',
+      },
+      bookings: {
+        saveWithEmail: 'POST /save-booking',
+        history: 'GET /booking-history/:username',
+        create: 'POST /bookings',
+        getByUser: 'GET /bookings/user/:userId',
+        getById: 'GET /bookings/:id',
+        cancel: 'PUT /bookings/:id/cancel',
+      },
+    },
+  });
+});
+
+// ============================================
+// CONTROLLER IMPORTS (for direct routing)
+// ============================================
+
+import { createBookingWithEmail, getBookingHistoryLegacy } from './controllers/bookingController.js';
+import { getAllSeats, bookSeat } from './controllers/seatController.js';
+
+// ============================================
+// ROUTE MOUNTING
+// ============================================
+
+/**
+ * Authentication Routes
+ * Base: /auth
+ * - POST /auth/signup
+ * - POST /auth/login
+ */
+app.use('/auth', authRoutes);
+
+/**
+ * Movie Management Routes
+ * Base: /api/movies
+ * - GET /api/movies (get all)
+ * - GET /api/movies/:id (get by id)
+ * - POST /api/movies (create)
+ * - PUT /api/movies/:id (update)
+ * - DELETE /api/movies/:id (delete)
+ */
+app.use('/api/movies', movieRoutes);
+
+/**
+ * Theatre Management Routes
+ * Base: /api/theatres
+ * - GET /api/theatres (get all)
+ * - GET /api/theatres?city=cityName&movieId=movieId (by city and movie)
+ * - GET /api/theatres/cities (get unique cities)
+ * - GET /api/theatres/city/:city (by city)
+ * - GET /api/theatres/:id (by id)
+ * - POST /api/theatres (create)
+ * - PUT /api/theatres/:id (update)
+ */
+app.use('/api/theatres', theatreRoutes);
+
+/**
+ * Show Management Routes
+ * Base: /api/shows
+ * - GET /api/shows (get all, filters: movieId, theatreId, date)
+ * - GET /api/shows/:id (get by id)
+ * - GET /api/shows/theatre/:theatreId (by theatre)
+ * - POST /api/shows (create)
+ * - PUT /api/shows/:id (update)
+ */
+app.use('/api/shows', showRoutes);
+
+/**
+ * Seat Management Routes
+ * Base: /seats
+ * - GET /seats
+ * - POST /seats/book
+ * - GET /seats/layout/:showId
+ * - GET /seats/available/:showId
+ */
+app.use('/seats', seatRoutes);
+
+/**
+ * Booking Management Routes
+ * Base: /bookings
+ * - POST /bookings/save
+ * - GET /bookings/history/:username
+ * - POST /bookings
+ * - GET /bookings/user/:userId
+ * - GET /bookings/:id
+ * - PUT /bookings/:id/cancel
+ */
+app.use('/bookings', bookingRoutes);
+
+/**
+ * LEGACY ROUTE COMPATIBILITY
+ * Direct routes for backward compatibility with existing frontend
+ */
+
+// GET /seats - Get all seats
+app.get('/seats-legacy', getAllSeats);
+
+// POST /save-booking - Create booking with email and PDF
+app.post('/save-booking', createBookingWithEmail);
+
+// GET /booking-history/:username - Get user booking history
+app.get('/booking-history/:username', getBookingHistoryLegacy);
+
+// POST /book-seat - Book specific seat
+app.post('/book-seat', bookSeat);
+
+// ============================================
+// ERROR HANDLING MIDDLEWARE
+// ============================================
+
+// 404 handler for undefined routes
+app.use(notFound);
+
+// Global error handler (must be last)
+app.use(errorHandler);
+
+// ============================================
+// SERVER STARTUP WITH SOCKET.IO
+// ============================================
+
+// Create HTTP server
+const server = http.createServer(app);
+
+// Initialize Socket.io with CORS
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL || process.env.CLIENT_URL,
+    methods: ['GET', 'POST'],
+    credentials: true
   },
+  transports: ['websocket', 'polling']
 });
 
-// 🔥 DB CONNECT
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected ✅"))
-  .catch((err) => console.error(err));
+// Initialize Socket.io event handlers
+initializeSocketHandlers(io);
 
-// 🔹 TEST
-app.get("/", (req, res) => {
-  res.send("Server running 🚀");
+// Setup periodic cleanup of expired locks (every 5 minutes)
+setInterval(cleanupExpiredLocks, 5 * 60 * 1000);
+
+// Start server
+server.listen(PORT, () => {
+  const backendUrl = process.env.BACKEND_URL || `http://localhost:${PORT}`;
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const environment = process.env.NODE_ENV || 'development';
+
+  console.log(`
+╔════════════════════════════════════════════════════════════╗
+║     🎬 MOVIE BOOKING SYSTEM - BACKEND SERVER (Socket.io)   ║
+╠════════════════════════════════════════════════════════════╣
+║  ✅ Status: Running                                        ║
+║  🔗 Backend: ${backendUrl.padEnd(51)}║
+║  🔗 Frontend: ${frontendUrl.padEnd(51)}║
+║  📡 Socket.io: Connected ✅                                ║
+║  📊 Environment: ${environment.padEnd(47)}║
+║  🗄️  Database: MongoDB Atlas (Connected)                  ║
+║  🔐 CORS Origin: ${frontendUrl.padEnd(46)}║
+╚════════════════════════════════════════════════════════════╝
+  `);
 });
 
-// 🔹 USER MODEL
-const User = mongoose.model(
-  "User",
-  new mongoose.Schema({
-    username: String,
-    email: { type: String, unique: true },
-    password: String,
-  })
-);
-
-// 🔹 SIGNUP
-app.post("/signup", async (req, res) => {
-  const { username, email, password } = req.body;
-
-  try {
-    const exists = await User.findOne({ email });
-    if (exists) return res.status(400).json({ error: "User exists" });
-
-    const hashed = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      username,
-      email,
-      password: hashed,
-    });
-
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET || "secret",
-      { expiresIn: "1h" }
-    );
-
-    res.json({ token, username, email });
-  } catch {
-    res.status(500).json({ error: "Signup error" });
-  }
-});
-
-// 🔹 LOGIN
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ error: "User not found" });
-
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(400).json({ error: "Invalid password" });
-
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET || "secret",
-      { expiresIn: "1h" }
-    );
-
-    res.json({ token, username: user.username, email });
-  } catch {
-    res.status(500).json({ error: "Login error" });
-  }
-});
-
-// 🔹 GET SEATS
-app.get("/seats", async (req, res) => {
-  try {
-    const seats = await Seat.find().sort({ section: 1, row: 1, col: 1 });
-    res.json(seats);
-  } catch {
-    res.status(500).json({ error: "Seat fetch error" });
-  }
-});
-
-// 🔹 BOOK SEAT
-app.post("/book-seat", async (req, res) => {
-  const { section, row, col } = req.body;
-
-  try {
-    const seat = await Seat.findOne({
-      section,
-      row: Number(row),
-      col: Number(col),
-    });
-
-    if (!seat) return res.status(404).json({ error: "Seat not found" });
-    if (seat.booked) return res.status(400).json({ error: "Seat already booked" });
-
-    seat.booked = true;
-    await seat.save();
-
-    res.json({ message: "Seat booked ✅" });
-  } catch {
-    res.status(500).json({ error: "Booking failed" });
-  }
-});
-
-// 🔥 SAVE BOOKING + EMAIL + QR PDF (FINAL)
-app.post("/save-booking", async (req, res) => {
-  const {
-    username,
-    email,
-    movieTitle,
-    city,
-    theaterName,
-    date,
-    time,
-    seats,
-  } = req.body;
-
-  try {
-    const booking = await Booking.create(req.body);
-
-    console.log("📩 Sending email to:", email);
-
-    const seatText = seats.join(", ");
-
-    const total = seats.reduce((sum, seat) => {
-      if (seat.startsWith("Premium")) return sum + 250;
-      if (seat.startsWith("Executive")) return sum + 200;
-      return sum + 150;
-    }, 0);
-
-    // 🔥 GENERATE QR
-    const qrData = await QRCode.toDataURL(
-      `${movieTitle} | ${theaterName} | ${date} ${time} | Seats: ${seatText}`
-    );
-
-    const doc = new PDFDocument();
-    let buffers = [];
-
-    doc.on("data", buffers.push.bind(buffers));
-
-    doc.on("end", async () => {
-      try {
-        const pdfData = Buffer.concat(buffers);
-
-        await transporter.sendMail({
-          from: process.env.EMAIL_USER,
-          to: email,
-          subject: "🎟️ Your Movie Ticket",
-          html: `
-            <div style="font-family: Arial; padding: 20px;">
-              <h2 style="color:#4f46e5;">🎬 Booking Confirmed</h2>
-
-              <p><b>Movie:</b> ${movieTitle}</p>
-              <p><b>Theater:</b> ${theaterName}</p>
-              <p><b>City:</b> ${city}</p>
-              <p><b>Date:</b> ${date}</p>
-              <p><b>Time:</b> ${time}</p>
-              <p><b>Seats:</b> ${seatText}</p>
-
-              <h3 style="color:green;">Total: ₹${total}</h3>
-              <p>🍿 Enjoy your show!</p>
-            </div>
-          `,
-          attachments: [
-            {
-              filename: "ticket.pdf",
-              content: pdfData,
-            },
-          ],
-        });
-
-        console.log("✅ Email sent successfully");
-      } catch (err) {
-        console.error("❌ Email failed:", err);
-      }
-    });
-
-    // 🔥 PDF DESIGN
-    doc.fontSize(20).fillColor("#4f46e5").text("🎟️ Movie Ticket", {
-      align: "center",
-    });
-
-    doc.moveDown();
-    doc.fillColor("black").fontSize(12);
-
-    doc.text(`Movie: ${movieTitle}`);
-    doc.text(`Theater: ${theaterName}`);
-    doc.text(`City: ${city}`);
-    doc.text(`Date: ${date}`);
-    doc.text(`Time: ${time}`);
-    doc.text(`Seats: ${seatText}`);
-
-    doc.moveDown();
-    doc.fillColor("green").text(`Total: ₹${total}`);
-
-    doc.moveDown();
-
-    // 🔥 QR ADD
-    const qrImage = qrData.replace(/^data:image\/png;base64,/, "");
-    doc.image(Buffer.from(qrImage, "base64"), {
-      fit: [120, 120],
-      align: "center",
-    });
-
-    doc.end();
-
-    res.json({ message: "Booking + Email Sent ✅", booking });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Booking failed" });
-  }
-});
-
-// 🔹 HISTORY
-app.get("/booking-history/:username", async (req, res) => {
-  try {
-    const data = await Booking.find({
-      username: req.params.username,
-    }).sort({ createdAt: -1 });
-
-    res.json(data);
-  } catch {
-    res.status(500).json({ error: "History error" });
-  }
-});
-
-// 🔹 START
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+export default app;

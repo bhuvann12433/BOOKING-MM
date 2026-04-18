@@ -2,11 +2,21 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "./SelectLocationPage.css";
-import data from "../data/theatres.json";
+import { theatreAPI, showAPI, handleAPIError } from "../services/api.js";
+
+// ============================================
+// FALLBACK DATA (If API fails)
+// ============================================
+
+import theatresData from "../data/theatres.json";
 
 function SelectLocationPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
+
+  // ============================================
+  // STATE MANAGEMENT
+  // ============================================
 
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedTheatre, setSelectedTheatre] = useState(null);
@@ -16,30 +26,154 @@ function SelectLocationPage() {
   const [theme, setTheme] = useState("dark");
   const [suggestedTime, setSuggestedTime] = useState(null);
 
+  // ============================================
+  // API STATE
+  // ============================================
+
+  const [cities, setCities] = useState([]);
+  const [theatres, setTheatres] = useState([]);
+  const [shows, setShows] = useState([]);
+  const [loadingCities, setLoadingCities] = useState(true);
+  const [loadingTheatres, setLoadingTheatres] = useState(false);
+  const [loadingShows, setLoadingShows] = useState(false);
+  const [error, setError] = useState(null);
+
   const dates = ["Today", "Tomorrow", "18 Apr", "19 Apr"];
 
-  // 🔍 FILTER CITIES
+  // ============================================
+  // FETCH CITIES ON MOUNT
+  // ============================================
+
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        setLoadingCities(true);
+        const response = await theatreAPI.getCities();
+        const cityList = response.data.data || response.data || [];
+        setCities(cityList);
+        
+        // Set first city as default or from state
+        if (state?.city) {
+          setSelectedCity(state.city);
+        } else if (cityList.length > 0) {
+          setSelectedCity(cityList[0]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch cities:", err);
+        const fallbackCities = Object.keys(theatresData);
+        setCities(fallbackCities);
+        if (state?.city) {
+          setSelectedCity(state.city);
+        } else if (fallbackCities.length > 0) {
+          setSelectedCity(fallbackCities[0]);
+        }
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+
+    fetchCities();
+  }, [state?.city]);
+
+  // ============================================
+  // FETCH THEATRES WHEN CITY CHANGES
+  // ============================================
+
+  useEffect(() => {
+    if (!selectedCity) return;
+
+    const fetchTheatres = async () => {
+      try {
+        setLoadingTheatres(true);
+        setError(null);
+        
+        // Try to fetch from API
+        const response = await theatreAPI.getByCity(selectedCity);
+        const theatreList = response.data.data || response.data || [];
+        
+        if (theatreList.length > 0) {
+          setTheatres(theatreList);
+        } else {
+          // Fallback to JSON data
+          const fallbackTheatres = theatresData[selectedCity] || [];
+          setTheatres(fallbackTheatres);
+        }
+      } catch (err) {
+        console.error("Failed to fetch theatres:", err);
+        // Use fallback data
+        const fallbackTheatres = theatresData[selectedCity] || [];
+        setTheatres(fallbackTheatres);
+      } finally {
+        setLoadingTheatres(false);
+      }
+    };
+
+    fetchTheatres();
+    setSelectedTheatre(null); // Reset theatre selection
+    setShows([]); // Clear shows
+  }, [selectedCity]);
+
+  // ============================================
+  // FETCH SHOWS WHEN THEATRE CHANGES
+  // ============================================
+
+  useEffect(() => {
+    if (!selectedTheatre || !selectedCity) return;
+
+    const fetchShows = async () => {
+      try {
+        setLoadingShows(true);
+        
+        // If theatre has shows property (from JSON), use it
+        if (selectedTheatre.shows) {
+          setShows(selectedTheatre.shows);
+        } else if (selectedTheatre._id && state?.movieId) {
+          // Try to fetch shows from API using theatreId and movieId
+          const response = await showAPI.getByMovieAndTheatre(
+            state.movieId,
+            selectedTheatre._id
+          );
+          const showList = response.data.data || response.data || selectedTheatre.shows || [];
+          setShows(showList);
+        }
+      } catch (err) {
+        console.error("Failed to fetch shows:", err);
+        // Use shows from theatre object or empty array
+        setShows(selectedTheatre.shows || []);
+      } finally {
+        setLoadingShows(false);
+      }
+    };
+
+    fetchShows();
+    setSelectedTime(null); // Reset time selection
+  }, [selectedTheatre, state?.movieId]);
+
+  // ============================================
+  // AUTO SUGGEST BEST TIME (middle show)
+  // ============================================
+
+  useEffect(() => {
+    if (selectedCity && selectedTheatre && shows.length > 0) {
+      const mid = Math.floor(shows.length / 2);
+      setSuggestedTime(shows[mid]);
+    }
+  }, [selectedCity, selectedTheatre, shows]);
+
+  // ============================================
+  // FILTER CITIES BY SEARCH
+  // ============================================
+
   const filteredCities = useMemo(() => {
-    return Object.keys(data).filter((city) =>
+    return cities.filter((city) =>
       city.toLowerCase().includes(search.toLowerCase())
     );
-  }, [search]);
+  }, [search, cities]);
 
-  // 🎯 AUTO SUGGEST BEST TIME (middle show = balanced crowd)
-  useEffect(() => {
-    if (selectedCity && selectedTheatre) {
-      const theatre = data[selectedCity].find(
-        (t) => t.name === selectedTheatre
-      );
+  // ============================================
+  // GET SEAT STATUS (Stable hash)
+  // ============================================
 
-      if (theatre?.shows?.length) {
-        const mid = Math.floor(theatre.shows.length / 2);
-        setSuggestedTime(theatre.shows[mid]);
-      }
-    }
-  }, [selectedCity, selectedTheatre]);
-
-  // 📊 STABLE SEAT STATUS (no flicker)
   const getSeatStatus = (name) => {
     const hash = name.length % 3;
     if (hash === 0) return "🔴 Filling Fast";
@@ -47,14 +181,23 @@ function SelectLocationPage() {
     return "🟢 Available";
   };
 
+  // ============================================
+  // HANDLE NEXT BUTTON
+  // ============================================
+
   const handleNext = () => {
-    if (!selectedCity || !selectedTheatre || !selectedTime) return;
+    if (!selectedCity || !selectedTheatre || !selectedTime) {
+      setError("Please select city, theatre, and show time");
+      return;
+    }
 
     navigate("/SeatBooking", {
       state: {
         movieTitle: state?.movieTitle || "Movie",
+        movieId: state?.movieId,
         city: selectedCity,
-        theaterName: selectedTheatre,
+        theaterName: selectedTheatre.name || selectedTheatre,
+        theatreId: selectedTheatre._id,
         date: selectedDate,
         time: selectedTime,
       },
@@ -123,28 +266,39 @@ function SelectLocationPage() {
         >
           <h3>🎭 Select Theatre</h3>
 
-          <div className="sl-grid">
-            {data[selectedCity].map((t) => (
-              <motion.div
-                key={t.name}
-                whileHover={{ scale: 1.05 }}
-                className={`sl-theatre-card ${
-                  selectedTheatre === t.name ? "active" : ""
-                }`}
-                onClick={() => {
-                  setSelectedTheatre(t.name);
-                  setSelectedTime(null);
-                }}
-              >
-                <img
-                  src={`https://source.unsplash.com/300x200/?cinema,${t.name}`}
-                  alt="theatre"
-                />
-                <h4>{t.name}</h4>
-                <p>{getSeatStatus(t.name)}</p>
-              </motion.div>
-            ))}
-          </div>
+          {loadingTheatres ? (
+            <p className="sl-loading">Loading theatres...</p>
+          ) : theatres.length === 0 ? (
+            <p className="sl-error">No theatres available in {selectedCity}</p>
+          ) : (
+            <div className="sl-grid">
+              {theatres.map((theatre) => {
+                const theatreName = theatre.name || theatre;
+                const theatreId = theatre._id || theatre.name;
+                const isSelected = selectedTheatre && 
+                  (selectedTheatre._id === theatreId || selectedTheatre.name === theatreName);
+                
+                return (
+                  <motion.div
+                    key={theatreId}
+                    whileHover={{ scale: 1.05 }}
+                    className={`sl-theatre-card ${isSelected ? "active" : ""}`}
+                    onClick={() => {
+                      setSelectedTheatre(theatre);
+                      setSelectedTime(null);
+                    }}
+                  >
+                    <img
+                      src={`https://source.unsplash.com/300x200/?cinema,${theatreName}`}
+                      alt="theatre"
+                    />
+                    <h4>{theatreName}</h4>
+                    <p>{getSeatStatus(theatreName)}</p>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </motion.div>
       )}
 
@@ -179,28 +333,41 @@ function SelectLocationPage() {
         >
           <h3>⏰ Select Time</h3>
 
-          {suggestedTime && (
-            <p className="suggest">
-              🤖 Best Choice: <strong>{suggestedTime}</strong>
-            </p>
-          )}
+          {loadingShows ? (
+            <p className="sl-loading">Loading show times...</p>
+          ) : shows.length === 0 ? (
+            <p className="sl-error">No shows available</p>
+          ) : (
+            <>
+              {suggestedTime && (
+                <p className="suggest">
+                  🤖 Best Choice: <strong>
+                    {suggestedTime.time || suggestedTime}
+                  </strong>
+                </p>
+              )}
 
-          <div className="sl-row">
-            {data[selectedCity]
-              .find((t) => t.name === selectedTheatre)
-              ?.shows.map((time) => (
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  key={time}
-                  className={`sl-chip ${
-                    selectedTime === time ? "active" : ""
-                  }`}
-                  onClick={() => setSelectedTime(time)}
-                >
-                  {time}
-                </motion.button>
-              ))}
-          </div>
+              <div className="sl-row">
+                {shows.map((show) => {
+                  const showTime = show.time || show;
+                  return (
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      key={showTime}
+                      className={`sl-chip ${
+                        selectedTime && (selectedTime.time === showTime || selectedTime === showTime)
+                          ? "active"
+                          : ""
+                      }`}
+                      onClick={() => setSelectedTime(show)}
+                    >
+                      {showTime}
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </motion.div>
       )}
 
@@ -213,10 +380,12 @@ function SelectLocationPage() {
         >
           <h4>Your Selection</h4>
           <p>📍 {selectedCity}</p>
-          {selectedTheatre && <p>🎭 {selectedTheatre}</p>}
+          {selectedTheatre && (
+            <p>🎭 {selectedTheatre.name || selectedTheatre}</p>
+          )}
           {selectedTime && (
             <p>
-              ⏰ {selectedDate} • {selectedTime}
+              ⏰ {selectedDate} • {selectedTime.time || selectedTime}
             </p>
           )}
         </motion.div>

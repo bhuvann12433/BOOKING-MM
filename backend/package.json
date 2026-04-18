@@ -2,10 +2,12 @@
   "type": "module",
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "seed": "node scripts/seed.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
@@ -18,7 +20,6 @@
     "mongoose": "^8.9.7",
     "nodemailer": "^8.0.5",
     "nodemon": "^3.1.9",
-    "package": "^1.0.1",
     "pdfkit": "^0.18.0",
     "qrcode": "^1.5.4"
   },

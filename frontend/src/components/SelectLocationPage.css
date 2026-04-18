@@ -217,3 +217,28 @@
   background: #e2e8f0;
   color: black;
 }
+
+/* ⏳ LOADING STATE */
+.sl-loading {
+  color: #94a3b8;
+  font-size: 14px;
+  padding: 20px;
+  text-align: center;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ⚠️ ERROR STATE */
+.sl-error {
+  color: #f87171;
+  font-size: 14px;
+  padding: 20px;
+  text-align: center;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}

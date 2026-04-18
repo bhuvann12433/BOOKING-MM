@@ -2,6 +2,11 @@ import "./HomePage.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { FaUser, FaMapMarkerAlt, FaSearch, FaChevronDown } from "react-icons/fa";
+import { movieAPI, theatreAPI, handleAPIError } from "../services/api.js";
+
+// ============================================
+// DEFAULT MOVIE FALLBACK DATA
+// ============================================
 
 import first from "../assets/images/first.jpg";
 import pushpa2 from "../assets/images/pushpa2.jpg";
@@ -10,11 +15,13 @@ import dakuimg1 from "../assets/images/dakuimg1.jpg";
 import virupaksha from "../assets/images/Virupaksha.webp";
 import second from "../assets/images/second.jpg";
 
-const AP_CITIES = [
-  "Vijayawada", "Visakhapatnam", "Guntur", "Tirupati", "Nellore",
-  "Kurnool", "Rajahmundry", "Kakinada", "Kadapa", "Anantapur",
-  "Eluru", "Ongole", "Narasaraopet", "Chittoor", "Srikakulam",
-  "Vizianagaram", "Tenali", "Proddatur", "Hindupur", "Bhimavaram"
+const FALLBACK_MOVIES = [
+  { src: first, rating: "4.8", title: "Sankranti ki Vastunnam", language: "Telugu", cert: "UA13+" },
+  { src: pushpa2, rating: "4.9", title: "Pushpa 2", language: "Telugu", cert: "UA13+" },
+  { src: hissab, rating: "4.7", title: "Hissab Barabar", language: "Telugu", cert: "UA13+" },
+  { src: dakuimg1, rating: "4.6", title: "Daku Maharaj", language: "Telugu", cert: "UA13+" },
+  { src: second, rating: "4.8", title: "Game Changer", language: "Telugu", cert: "UA13+" },
+  { src: virupaksha, rating: "4.7", title: "Virupaksha", language: "Telugu", cert: "UA13+" },
 ];
 
 function HomePage() {
@@ -25,71 +32,76 @@ function HomePage() {
   const [activeTab, setActiveTab] = useState("Movies");
   const [hovered, setHovered] = useState(null);
 
- useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (!token) navigate("/LoginPage");
-}, [navigate]);
+  // ============================================
+  // STATE MANAGEMENT
+  // ============================================
 
-  const movies = [
-    { src: first, rating: "4.8", title: "Sankranti ki Vastunnam", language: "Telugu", cert: "UA13+" },
-    { src: pushpa2, rating: "4.9", title: "Pushpa 2", language: "Telugu", cert: "UA13+" },
+  const [movies, setMovies] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    {
-      src: "https://akamaividz2.zee5.com/image/upload/w_504,h_756,c_scale,f_webp,q_auto:eco/resources/0-0-59409/portrait/jerseytrailer1920x770.jpg",
-      rating: "4.8",
-      title: "Jersey",
-      language: "Telugu",
-      cert: "UA13+",
-      trailer: "https://www.youtube.com/embed/6QurJwqH8uU"
-    },
+  // ============================================
+  // FETCH MOVIES ON MOUNT
+  // ============================================
 
-    { src: hissab, rating: "4.7", title: "Hissab Barabar", language: "Telugu", cert: "UA13+" },
-    { src: dakuimg1, rating: "4.6", title: "Daku Maharaj", language: "Telugu", cert: "UA13+" },
-    { src: second, rating: "4.8", title: "Game Changer", language: "Telugu", cert: "UA13+" },
-    { src: virupaksha, rating: "4.7", title: "Virupaksha", language: "Telugu", cert: "UA13+" },
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) navigate("/LoginPage");
 
-    {
-      src: "https://m.media-amazon.com/images/M/MV5BMTNmNjM0OTktNmQ5NC00MWY1LWE4MDEtYWM0MjU4M2U0NTdiXkEyXkFqcGc@._V1_.jpg",
-      rating: "4.7",
-      title: "Dhurandhar",
-      language: "Telugu",
-      cert: "A",
-      trailer: "https://www.youtube.com/embed/rV6kEsAyrdY"
-    },
+    const fetchMovies = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await movieAPI.getAll();
+        const fetchedMovies = response.data.data || response.data || [];
+        
+        // Map backend movies to frontend format
+        const formattedMovies = fetchedMovies.map(movie => ({
+          _id: movie._id,
+          title: movie.title,
+          src: movie.posterUrl || movie.poster || first, // Use fallback image
+          rating: movie.rating || "4.5",
+          language: movie.language || "Telugu",
+          cert: movie.certification || "UA13+",
+          trailer: movie.trailerUrl || movie.trailer,
+        }));
 
-    {
-      src: "https://cdn.gulte.com/wp-content/uploads/2025/04/Nani-the-Paradise.jpg",
-      rating: "4.9",
-      title: "The Paradise",
-      language: "Telugu",
-      cert: "UA13+",
-      trailer: "https://www.youtube.com/embed/82NQRgVFinI"
-    },
-    {
-      src: "https://pbs.twimg.com/media/G4qQcQ8bQAICq9Z?format=jpg&name=large",
-      rating: "4.9",
-      title: "Peddi",
-      language: "Telugu",
-      cert: "UA13+",
-      trailer: "https://www.youtube.com/embed/qBDLZA1qXQk"
-    },
-    {
-      src: "https://www.theweek.in/content/dam/week/week/news/entertainment/images/2025/10/18/they-call-him-og-ott-release.jpg",
-      rating: "4.8",
-      title: "OG",
-      language: "Telugu",
-      cert: "A",
-      trailer: "https://www.youtube.com/embed/kvJCa116VO8"
-    },
-    {
-      src: "https://i.insider.com/67d31ebd69253ccddf992d4d?width=1200&format=jpeg",
-      rating: "4.6",
-      title: "F1",
-      language: "English",
-      cert: "UA13+",
-      trailer: "https://www.youtube.com/embed/gxmRQqo7Ztk"
-    }
-  ];
+        setMovies(formattedMovies.length > 0 ? formattedMovies : FALLBACK_MOVIES);
+      } catch (err) {
+        console.error("Failed to fetch movies:", err);
+        setError("Failed to load movies");
+        setMovies(FALLBACK_MOVIES); // Fallback to hardcoded data
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMovies();
+  }, [navigate]);
+
+  // ============================================
+  // FETCH CITIES ON MOUNT
+  // ============================================
+
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const response = await theatreAPI.getCities();
+        const cityList = response.data.data || response.data || ["Vijayawada"];
+        setCities(cityList);
+      } catch (err) {
+        console.error("Failed to fetch cities:", err);
+        setCities(["Vijayawada", "Visakhapatnam"]); // Fallback cities
+      }
+    };
+
+    fetchCities();
+  }, []);
+
+  // ============================================
+  // FILTER MOVIES BY SEARCH QUERY
+  // ============================================
 
   const filtered = movies.filter(m =>
     m.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -115,19 +127,23 @@ function HomePage() {
 
           {showLocationDropdown && (
             <div className="hp-dropdown" onClick={e => e.stopPropagation()}>
-              <p className="hp-dropdown-label">Select City — Andhra Pradesh</p>
-              {AP_CITIES.map(city => (
-                <div
-                  key={city}
-                  className={`hp-dropdown-item ${city === selectedCity ? "active" : ""}`}
-                  onClick={() => {
-                    setSelectedCity(city);
-                    setShowLocationDropdown(false);
-                  }}
-                >
-                  {city}
-                </div>
-              ))}
+              <p className="hp-dropdown-label">Select City</p>
+              {cities.length > 0 ? (
+                cities.map(city => (
+                  <div
+                    key={city}
+                    className={`hp-dropdown-item ${city === selectedCity ? "active" : ""}`}
+                    onClick={() => {
+                      setSelectedCity(city);
+                      setShowLocationDropdown(false);
+                    }}
+                  >
+                    {city}
+                  </div>
+                ))
+              ) : (
+                <p className="hp-dropdown-label">Loading cities...</p>
+              )}
             </div>
           )}
         </div>
@@ -163,51 +179,72 @@ function HomePage() {
       <main className="hp-main">
         <h2 className="hp-section-title">Only in Theatres</h2>
 
-        <div className="hp-grid">
-          {filtered.map((movie, i) => (
-            <div
-              key={i}
-              className="hp-card"
-              onClick={() =>
-                navigate("/select-location", {
-  state: {
-    movieTitle: movie.title,
-    city: selectedCity
-  }
-})
-              }
-            >
-              <div
-                className="hp-card-img-wrap"
-                onMouseEnter={() => setHovered(i)}
-                onMouseLeave={() => setHovered(null)}
-              >
-                {hovered === i && movie.trailer ? (
-                  <iframe
-                    src={`${movie.trailer}?autoplay=1&controls=1`}
-                    title={movie.title}
-                    className="hp-card-img"
-                    allow="autoplay"
-                  />
-                ) : (
-                  <img
-                    src={movie.src}
-                    alt={movie.title}
-                    className="hp-card-img"
-                  />
-                )}
-              </div>
+        {loading ? (
+          <div className="hp-loading">
+            <p>🎬 Loading movies...</p>
+          </div>
+        ) : error ? (
+          <div className="hp-error">
+            <p>⚠️ {error}</p>
+            <p className="hp-error-hint">Showing available movies instead</p>
+          </div>
+        ) : null}
 
-              <div className="hp-card-info">
-                <p className="hp-card-title">{movie.title}</p>
-                <p className="hp-card-meta">
-                  <span className="hp-cert">{movie.cert}</span>
-                  <span className="hp-dot">|</span>
-                  <span>{movie.language}</span>
-                </p>
+        <div className="hp-grid">
+          {filtered.length > 0 ? (
+            filtered.map((movie, i) => (
+              <div
+                key={movie._id || i}
+                className="hp-card"
+                onClick={() =>
+                  navigate("/select-location", {
+                    state: {
+                      movieTitle: movie.title,
+                      movieId: movie._id,
+                      city: selectedCity
+                    }
+                  })
+                }
+              >
+                <div
+                  className="hp-card-img-wrap"
+                  onMouseEnter={() => setHovered(i)}
+                  onMouseLeave={() => setHovered(null)}
+                >
+                  {hovered === i && movie.trailer ? (
+                    <iframe
+                      src={`${movie.trailer}?autoplay=1&controls=1`}
+                      title={movie.title}
+                      className="hp-card-img"
+                      allow="autoplay"
+                    />
+                  ) : (
+                    <img
+                      src={movie.src}
+                      alt={movie.title}
+                      className="hp-card-img"
+                      onError={(e) => {
+                        e.target.src = first; // Fallback image
+                      }}
+                    />
+                  )}
+                </div>
+
+                <div className="hp-card-info">
+                  <p className="hp-card-title">{movie.title}</p>
+                  <p className="hp-card-meta">
+                    <span className="hp-cert">{movie.cert}</span>
+                    <span className="hp-dot">|</span>
+                    <span>{movie.language}</span>
+                  </p>
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="hp-no-movies">
+              <p>No movies found</p>
             </div>
-          ))}
+          )}
         </div>
       </main>
 
