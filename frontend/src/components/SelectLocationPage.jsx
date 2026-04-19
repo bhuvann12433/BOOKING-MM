@@ -49,17 +49,32 @@ function SelectLocationPage() {
       try {
         setLoadingCities(true);
         const response = await theatreAPI.getCities();
-        const cityList = response.data.data || response.data || [];
+        console.log("Cities API Response:", response);
+
+        let cityList = [];
+        if (response && response.data) {
+          cityList = Array.isArray(response.data.data)
+            ? response.data.data
+            : Array.isArray(response.data)
+              ? response.data
+              : [];
+        }
+
+        console.log("Extracted cities:", cityList);
+
+        if (!Array.isArray(cityList) || cityList.length === 0) {
+          cityList = Object.keys(theatresData);
+        }
+
         setCities(cityList);
-        
-        // Set first city as default or from state
+
         if (state?.city) {
           setSelectedCity(state.city);
         } else if (cityList.length > 0) {
           setSelectedCity(cityList[0]);
         }
       } catch (err) {
-        console.error("Failed to fetch cities:", err);
+        console.error("Failed to fetch cities:", err.message);
         const fallbackCities = Object.keys(theatresData);
         setCities(fallbackCities);
         if (state?.city) {
@@ -86,21 +101,29 @@ function SelectLocationPage() {
       try {
         setLoadingTheatres(true);
         setError(null);
-        
-        // Try to fetch from API
+
         const response = await theatreAPI.getByCity(selectedCity);
-        const theatreList = response.data.data || response.data || [];
-        
-        if (theatreList.length > 0) {
-          setTheatres(theatreList);
-        } else {
-          // Fallback to JSON data
+        console.log("Theatres API Response:", response);
+
+        let theatreList = [];
+        if (response && response.data) {
+          theatreList = Array.isArray(response.data.data)
+            ? response.data.data
+            : Array.isArray(response.data)
+              ? response.data
+              : [];
+        }
+
+        console.log("Extracted theatres:", theatreList);
+
+        if (!Array.isArray(theatreList) || theatreList.length === 0) {
           const fallbackTheatres = theatresData[selectedCity] || [];
           setTheatres(fallbackTheatres);
+        } else {
+          setTheatres(theatreList);
         }
       } catch (err) {
-        console.error("Failed to fetch theatres:", err);
-        // Use fallback data
+        console.error("Failed to fetch theatres:", err.message);
         const fallbackTheatres = theatresData[selectedCity] || [];
         setTheatres(fallbackTheatres);
       } finally {
@@ -109,8 +132,8 @@ function SelectLocationPage() {
     };
 
     fetchTheatres();
-    setSelectedTheatre(null); // Reset theatre selection
-    setShows([]); // Clear shows
+    setSelectedTheatre(null);
+    setShows([]);
   }, [selectedCity]);
 
   // ============================================
@@ -123,22 +146,40 @@ function SelectLocationPage() {
     const fetchShows = async () => {
       try {
         setLoadingShows(true);
-        
-        // If theatre has shows property (from JSON), use it
-        if (selectedTheatre.shows) {
+
+        if (selectedTheatre.shows && Array.isArray(selectedTheatre.shows)) {
           setShows(selectedTheatre.shows);
-        } else if (selectedTheatre._id && state?.movieId) {
-          // Try to fetch shows from API using theatreId and movieId
+          return;
+        }
+
+        if (selectedTheatre._id && state?.movieId) {
           const response = await showAPI.getByMovieAndTheatre(
             state.movieId,
             selectedTheatre._id
           );
-          const showList = response.data.data || response.data || selectedTheatre.shows || [];
+          console.log("Shows API Response:", response);
+
+          let showList = [];
+          if (response && response.data) {
+            showList = Array.isArray(response.data.data)
+              ? response.data.data
+              : Array.isArray(response.data)
+                ? response.data
+                : [];
+          }
+
+          console.log("Extracted shows:", showList);
+
+          if (!Array.isArray(showList) || showList.length === 0) {
+            showList = selectedTheatre.shows || [];
+          }
+
           setShows(showList);
+        } else {
+          setShows(selectedTheatre.shows || []);
         }
       } catch (err) {
-        console.error("Failed to fetch shows:", err);
-        // Use shows from theatre object or empty array
+        console.error("Failed to fetch shows:", err.message);
         setShows(selectedTheatre.shows || []);
       } finally {
         setLoadingShows(false);
@@ -146,7 +187,7 @@ function SelectLocationPage() {
     };
 
     fetchShows();
-    setSelectedTime(null); // Reset time selection
+    setSelectedTime(null);
   }, [selectedTheatre, state?.movieId]);
 
   // ============================================
@@ -185,10 +226,45 @@ function SelectLocationPage() {
   // HANDLE NEXT BUTTON
   // ============================================
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!selectedCity || !selectedTheatre || !selectedTime) {
-      setError("Please select city, theatre, and show time");
+      setError("❌ Please select city, theatre, and show time");
       return;
+    }
+
+    // ✅ FIX: Read username and email from localStorage (saved during signup/login)
+    const username = localStorage.getItem("username");
+    const email = localStorage.getItem("email");
+
+    // ✅ If not logged in, redirect to login
+    if (!username || !email) {
+      setError("❌ Please login first to continue booking.");
+      navigate("/LoginPage");
+      return;
+    }
+
+    let showId = selectedTime?._id;
+
+    if (!showId && selectedTheatre._id && state?.movieId) {
+      try {
+        const response = await showAPI.getByMovieAndTheatre(
+          state.movieId,
+          selectedTheatre._id
+        );
+        const shows = Array.isArray(response.data?.data)
+          ? response.data.data
+          : [];
+        if (shows.length > 0) {
+          showId = shows[0]._id;
+        }
+      } catch (err) {
+        console.error("Failed to fetch showId:", err.message);
+      }
+    }
+
+    let showTime = selectedTime;
+    if (typeof selectedTime === "object") {
+      showTime = selectedTime.showTime || selectedTime.time || selectedTime;
     }
 
     navigate("/SeatBooking", {
@@ -198,8 +274,11 @@ function SelectLocationPage() {
         city: selectedCity,
         theaterName: selectedTheatre.name || selectedTheatre,
         theatreId: selectedTheatre._id,
+        showId: showId || null,
         date: selectedDate,
-        time: selectedTime,
+        time: showTime,
+        username,  // ✅ ADDED - from localStorage
+        email,     // ✅ ADDED - from localStorage
       },
     });
   };
@@ -275,9 +354,11 @@ function SelectLocationPage() {
               {theatres.map((theatre) => {
                 const theatreName = theatre.name || theatre;
                 const theatreId = theatre._id || theatre.name;
-                const isSelected = selectedTheatre && 
-                  (selectedTheatre._id === theatreId || selectedTheatre.name === theatreName);
-                
+                const isSelected =
+                  selectedTheatre &&
+                  (selectedTheatre._id === theatreId ||
+                    selectedTheatre.name === theatreName);
+
                 return (
                   <motion.div
                     key={theatreId}
@@ -341,9 +422,8 @@ function SelectLocationPage() {
             <>
               {suggestedTime && (
                 <p className="suggest">
-                  🤖 Best Choice: <strong>
-                    {suggestedTime.time || suggestedTime}
-                  </strong>
+                  🤖 Best Choice:{" "}
+                  <strong>{suggestedTime.time || suggestedTime}</strong>
                 </p>
               )}
 
@@ -355,7 +435,9 @@ function SelectLocationPage() {
                       whileTap={{ scale: 0.9 }}
                       key={showTime}
                       className={`sl-chip ${
-                        selectedTime && (selectedTime.time === showTime || selectedTime === showTime)
+                        selectedTime &&
+                        (selectedTime.time === showTime ||
+                          selectedTime === showTime)
                           ? "active"
                           : ""
                       }`}

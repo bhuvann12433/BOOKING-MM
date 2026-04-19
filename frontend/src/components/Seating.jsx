@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import "./Seating.css";
 import { useLocation } from "react-router-dom";
-import { useSocket } from "../hooks/useSocket";
 
 // 🔹 Convert date strings to DD/MM/YYYY format
 const getFormattedDate = (dateStr) => {
@@ -23,30 +22,19 @@ const getFormattedDate = (dateStr) => {
 
 const Seating = () => {
   const location = useLocation();
-  const { date, time, movieTitle, city, theaterName } = location.state || {};
+  // ✅ FIX 1: Also pull username and email from location.state
+  const { date, time, movieTitle, city, theaterName, username, email } =
+    location.state || {};
 
-  // Socket.io setup
-  const socket = useSocket();
-
-  // State
+  // 🔹 State
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [bookedSeats, setBookedSeats] = useState([]);
-  const [lockedSeats, setLockedSeats] = useState([]); // Seats locked by other users
-  const [userLockedSeats, setUserLockedSeats] = useState([]); // Seats locked by current user
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [lockTimer, setLockTimer] = useState(null);
-  const [showId, setShowId] = useState("");
-  const [userId, setUserId] = useState("");
+  const [userLockedSeats, setUserLockedSeats] = useState([]);
 
   const API = import.meta.env.VITE_API_URL;
-
-  // 🔹 Mapping frontend → backend
-  const categoryMap = {
-    Premium: "Sofa",
-    Executive: "Chair",
-    Normal: "Table",
-  };
 
   const categoryShort = {
     Premium: "P",
@@ -54,121 +42,20 @@ const Seating = () => {
     Normal: "N",
   };
 
-  // 🔹 Initialize Socket.io connection
-  useEffect(() => {
-    if (!socket) return;
-
-    const username = localStorage.getItem("username") || "Guest";
-    const uid = localStorage.getItem("userId") || `user_${Date.now()}`;
-    setUserId(uid);
-
-    // Generate showId from location state (movie + theater + date)
-    const generatedShowId = `${movieTitle}_${theaterName}_${date}`.replace(/\s+/g, "_");
-    setShowId(generatedShowId);
-
-    // Join show room
-    socket.emit("join_show", {
-      showId: generatedShowId,
-      userId: uid,
-    });
-
-    console.log(`📡 Joining show room: ${generatedShowId}`);
-
-    // Listen for show loaded
-    socket.on("show_loaded", (data) => {
-      console.log("🎭 Show loaded:", data);
-      setLoading(false);
-      setMessage("✅ Connected to live seat updates");
-      setTimeout(() => setMessage(""), 3000);
-    });
-
-    // Cleanup
-    return () => {
-      socket.off("show_loaded");
-    };
-  }, [socket, movieTitle, theaterName, date]);
-
-  // 🔹 Listen for real-time seat updates
-  useEffect(() => {
-    if (!socket) return;
-
-    // When other users lock seats
-    socket.on("seat_locked", (data) => {
-      console.log("🔒 Other user locked seats:", data.seatNumbers);
-      setLockedSeats((prev) => [
-        ...new Set([...prev, ...data.seatNumbers]),
-      ]);
-      setMessage(`🔒 ${data.userId} locked seats`);
-      setTimeout(() => setMessage(""), 2000);
-    });
-
-    // When seats are booked
-    socket.on("seat_booked", (data) => {
-      console.log("✅ Seats booked:", data.seatNumbers);
-      setBookedSeats((prev) => [
-        ...new Set([...prev, ...data.seatNumbers]),
-      ]);
-      setLockedSeats((prev) =>
-        prev.filter((s) => !data.seatNumbers.includes(s))
-      );
-      setMessage("✅ Seats booked");
-      setTimeout(() => setMessage(""), 2000);
-    });
-
-    // When seats are released
-    socket.on("seat_released", (data) => {
-      console.log("🔓 Seats released:", data.seatNumbers);
-      setLockedSeats((prev) =>
-        prev.filter((s) => !data.seatNumbers.includes(s))
-      );
-      setMessage("🔓 Seats available again");
-      setTimeout(() => setMessage(""), 2000);
-    });
-
-    // Lock response
-    socket.on("lock_success", (data) => {
-      console.log("✅ Lock success:", data);
-      setMessage(`✅ ${data.lockedSeats.length} seats locked for 5 minutes`);
-      setTimeout(() => setMessage(""), 3000);
-    });
-
-    socket.on("lock_failed", (data) => {
-      console.error("❌ Lock failed:", data.message);
-      setMessage(`❌ ${data.message}`);
-      setTimeout(() => setMessage(""), 3000);
-      setSelectedSeats([]); // Clear failed selections
-    });
-
-    // Book response
-    socket.on("book_success", (data) => {
-      console.log("✅ Book success:", data);
-      setUserLockedSeats([]);
-      setSelectedSeats([]);
-    });
-
-    socket.on("book_failed", (data) => {
-      console.error("❌ Book failed:", data.message);
-      setMessage(`❌ Book failed: ${data.message}`);
-      setTimeout(() => setMessage(""), 3000);
-    });
-
-    return () => {
-      socket.off("seat_locked");
-      socket.off("seat_booked");
-      socket.off("seat_released");
-      socket.off("lock_success");
-      socket.off("lock_failed");
-      socket.off("book_success");
-      socket.off("book_failed");
-    };
-  }, [socket]);
-
-  // 🔹 Fetch initial seats (REST API fallback)
+  // 🔹 Fetch booked seats
+  // ✅ FIX 2: Backend returns { success, count, data: [...] } not a plain array
   const fetchSeats = async () => {
     try {
       const res = await axios.get(`${API}/seats`);
 
-      const booked = res.data
+      // Handle both array response and object response safely
+      const seatsArray = Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data?.data)
+        ? res.data.data
+        : [];
+
+      const booked = seatsArray
         .filter((s) => s.booked)
         .map((s) => {
           const frontendCategory =
@@ -183,7 +70,7 @@ const Seating = () => {
 
       setBookedSeats(booked);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch seats:", err);
     } finally {
       setLoading(false);
     }
@@ -193,38 +80,25 @@ const Seating = () => {
     fetchSeats();
   }, []);
 
-  // 🔹 Lock seats (5-minute timeout)
+  // 🔹 Lock seats (local only)
   const lockSeats = useCallback(() => {
-    if (!socket || !showId || selectedSeats.length === 0) return;
+    if (selectedSeats.length === 0) return;
 
-    const seatNumbers = selectedSeats.map((s) => {
-      const [category, row, col] = s.split("-");
-      return `${categoryShort[category]}${row}-${col}`;
-    });
-
-    console.log("🔒 Locking seats:", seatNumbers);
-
-    socket.emit("lock_seat", {
-      showId,
-      seatNumbers,
-      userId,
-    });
-
-    // Set timer for lock expiry
-    setLockTimer(300); // 5 minutes
     setUserLockedSeats(selectedSeats);
-  }, [socket, showId, selectedSeats, userId]);
+    setLockTimer(300);
+    setMessage("Seats locked for 5 minutes");
+  }, [selectedSeats]);
 
-  // 🔹 Lock countdown timer
+  // 🔹 Timer logic
   useEffect(() => {
-    if (!lockTimer || lockTimer <= 0) return;
+    if (!lockTimer) return;
 
     const interval = setInterval(() => {
       setLockTimer((prev) => {
         if (prev <= 1) {
-          setMessage("⚠️ Lock expired! Select seats again.");
-          setUserLockedSeats([]);
+          setMessage("⚠️ Lock expired!");
           setSelectedSeats([]);
+          setUserLockedSeats([]);
           return null;
         }
         return prev - 1;
@@ -240,80 +114,61 @@ const Seating = () => {
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  // 🔹 Book seats (finalize)
-  const bookSeatsSocket = useCallback(async () => {
-    if (!socket || !showId || userLockedSeats.length === 0) return;
+  // 🔹 Book seats
+  // ✅ FIX 3: Send username + email (required by backend)
+  // ✅ FIX 4: Send seats in full format e.g. "Premium-3-12" so backend
+  //           can correctly calculate price with seat.startsWith('Premium')
+  const bookSeats = async () => {
+    if (userLockedSeats.length === 0) return;
 
-    const bookingId = `BOOKING_${Date.now()}`;
-    const seatNumbers = userLockedSeats.map((s) => {
-      const [category, row, col] = s.split("-");
-      return `${categoryShort[category]}${row}-${col}`;
-    });
+    // Guard: backend requires username and email
+    if (!username || !email) {
+      setMessage("❌ Missing user info. Please login again.");
+      return;
+    }
 
-    console.log("📦 Booking seats:", seatNumbers);
-
-    // Emit socket event
-    socket.emit("book_seat", {
-      showId,
-      seatNumbers,
-      userId,
-      bookingId,
-    });
-
-    // Also save to backend
     try {
       await axios.post(`${API}/save-booking`, {
-        username: localStorage.getItem("username"),
-        email: localStorage.getItem("email"),
+        username,
+        email,
         movieTitle,
         city,
         theaterName,
         date: getFormattedDate(date),
         time,
+        // Send full format seats e.g. "Premium-3-12"
+        // Backend uses seat.startsWith('Premium'/'Executive') for price
         seats: userLockedSeats,
-        bookingId,
       });
 
       setMessage("✅ Booking confirmed!");
-      setUserLockedSeats([]);
       setSelectedSeats([]);
+      setUserLockedSeats([]);
       setLockTimer(null);
     } catch (err) {
-      console.error("Booking failed:", err);
-      setMessage("❌ Booking failed");
+      console.error("Booking error:", err);
+      // Show backend error message if available
+      const errMsg =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Booking failed";
+      setMessage(`❌ ${errMsg}`);
     }
-  }, [socket, showId, userLockedSeats, userId, movieTitle, city, theaterName, date]);
+  };
 
-  // 🔹 Unlock seats (manual cancel)
-  const unlockSeats = useCallback(() => {
-    if (!socket || !showId || selectedSeats.length === 0) return;
-
-    const seatNumbers = selectedSeats.map((s) => {
-      const [category, row, col] = s.split("-");
-      return `${categoryShort[category]}${row}-${col}`;
-    });
-
-    socket.emit("unlock_seat", {
-      showId,
-      seatNumbers,
-      userId,
-    });
-
+  // 🔹 Unlock seats
+  const unlockSeats = () => {
     setSelectedSeats([]);
     setUserLockedSeats([]);
     setLockTimer(null);
     setMessage("🔓 Seats released");
-    setTimeout(() => setMessage(""), 2000);
-  }, [socket, showId, selectedSeats, userId]);
+  };
 
-  // 🔹 Select / Deselect
+  // 🔹 Select seat
   const toggleSeatSelection = (category, row, col) => {
     const seatId = `${category}-${row}-${col}`;
 
-    // Can't select if booked or locked by others
-    const seatDisplay = `${categoryShort[category]}${row}-${col}`;
-    if (bookedSeats.includes(seatId) || lockedSeats.includes(seatDisplay))
-      return;
+    if (bookedSeats.includes(seatId)) return;
 
     setSelectedSeats((prev) =>
       prev.includes(seatId)
@@ -322,7 +177,7 @@ const Seating = () => {
     );
   };
 
-  // 🔹 Get price
+  // 🔹 Price
   const getPrice = (category) => {
     if (category === "Premium") return 250;
     if (category === "Executive") return 200;
@@ -334,6 +189,7 @@ const Seating = () => {
     return sum + getPrice(category);
   }, 0);
 
+  // Display format: P3-12
   const formattedSeats = selectedSeats.map((seat) => {
     const [category, row, col] = seat.split("-");
     return `${categoryShort[category]}${row}-${col}`;
@@ -350,30 +206,18 @@ const Seating = () => {
         <div className="row" key={r}>
           {Array.from({ length: 20 }).map((_, c) => {
             const seatId = `${category}-${r + 1}-${c + 1}`;
-            const seatDisplay = `${categoryShort[category]}${r + 1}-${c + 1}`;
             const isSelected = selectedSeats.includes(seatId);
             const isBooked = bookedSeats.includes(seatId);
-            const isLockedByOther = lockedSeats.includes(seatDisplay);
-            const isLockedByUser = userLockedSeats.includes(seatId);
 
             return (
               <button
                 key={seatId}
-                disabled={isBooked || isLockedByOther}
+                disabled={isBooked}
                 onClick={() => toggleSeatSelection(category, r + 1, c + 1)}
                 className={`seat 
                   ${isBooked ? "booked" : ""}
-                  ${isLockedByOther ? "locked-other" : ""}
-                  ${isLockedByUser ? "locked-by-user" : ""}
                   ${isSelected ? "selected" : ""}
                 `}
-                title={
-                  isBooked
-                    ? "Booked"
-                    : isLockedByOther
-                    ? "Locked by other user"
-                    : ""
-                }
               >
                 {c + 1}
               </button>
@@ -440,17 +284,10 @@ const Seating = () => {
             </button>
           ) : (
             <>
-              <button
-                disabled={userLockedSeats.length === 0}
-                onClick={bookSeatsSocket}
-                className="btn-book"
-              >
+              <button onClick={bookSeats} className="btn-book">
                 ✅ Complete Booking
               </button>
-              <button
-                onClick={unlockSeats}
-                className="btn-unlock"
-              >
+              <button onClick={unlockSeats} className="btn-unlock">
                 🔓 Cancel Selection
               </button>
             </>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
 import "./SignupPage.css";
 
-const API = import.meta.env.VITE_API_URL; // ✅ use env
+const API = import.meta.env.VITE_API_URL;
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -51,7 +51,7 @@ const SignupPage = () => {
     }
 
     try {
-      const response = await fetch(`${API}/signup`, { // ✅ FIXED
+      const response = await fetch(`${API}/auth/signup`, { // ✅ FIXED: was /signup
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,14 +62,20 @@ const SignupPage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("username", data.username);
-        localStorage.setItem("email", data.email);
+        // ✅ FIX: Handle both response formats:
+        // Format 1: { token, username, email }
+        // Format 2: { token, user: { username, email } }
+        const savedUsername = data.username || data.user?.username || username;
+        const savedEmail = data.email || data.user?.email || email;
+
+        localStorage.setItem("username", savedUsername);
+        localStorage.setItem("email", savedEmail);
         localStorage.setItem("token", data.token);
 
         alert("Signed up successfully!");
         navigate("/");
       } else {
-        setError(data.error || "Signup failed. Please try again.");
+        setError(data.error || data.message || "Signup failed. Please try again.");
       }
     } catch (err) {
       setError("Server not responding. Check backend.");

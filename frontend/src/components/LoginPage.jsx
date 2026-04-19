@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
 
-const API = import.meta.env.VITE_API_URL; // ✅ use env
+const API = import.meta.env.VITE_API_URL;
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const LoginPage = () => {
     }
 
     try {
-      const response = await fetch(`${API}/login`, { // ✅ FIXED
+      const response = await fetch(`${API}/auth/login`, { // ✅ FIXED: was /login, must be /auth/login
         method: "POST",
         headers: {
           "Content-Type": "application/json",

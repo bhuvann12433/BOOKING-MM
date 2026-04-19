@@ -1,6 +1,7 @@
 import Booking from "../models/Booking.js";
 import Seat from "../models/Seat.js";
 import Show from "../models/Show.js";
+import User from "../models/User.js";
 
 // Create booking
 export const createBooking = async (req, res) => {
@@ -154,17 +155,14 @@ export const cancelBooking = async (req, res) => {
       });
     }
 
-    // Update booking status
     booking.bookingStatus = "cancelled";
     await booking.save();
 
-    // Release seats
     await Seat.updateMany(
       { _id: { $in: booking.seats } },
       { status: "available", bookedBy: null }
     );
 
-    // Update show availability
     const show = await Show.findById(booking.show);
     await Show.findByIdAndUpdate(booking.show, {
       availableSeats: show.availableSeats + booking.seats.length,
@@ -184,8 +182,7 @@ export const cancelBooking = async (req, res) => {
 };
 
 /**
- * LEGACY ENDPOINTS (from original server.js)
- * Kept for backward compatibility with existing frontend
+ * LEGACY ENDPOINTS
  */
 
 import transporter from '../config/email.js';
@@ -195,7 +192,6 @@ import QRCode from 'qrcode';
 /**
  * Create Booking with Email and PDF Ticket (Legacy)
  * @route POST /save-booking
- * Generates PDF ticket with QR code and sends email confirmation
  */
 export const createBookingWithEmail = async (req, res) => {
   const {
@@ -210,31 +206,62 @@ export const createBookingWithEmail = async (req, res) => {
   } = req.body;
 
   try {
-    // Validate input
+    // ✅ Validate all required fields
     if (!username || !email || !movieTitle || !theaterName || !date || !time || !seats || seats.length === 0) {
       return res.status(400).json({
-        error: 'All booking fields are required',
+        error: 'All booking fields are required (username, email, movieTitle, theaterName, date, time, seats)',
       });
     }
 
-    // Create booking record in database
-    const booking = await Booking.create(req.body);
-    console.log('📝 Booking created:', booking._id);
+    // ✅ FIX: Look up real user ObjectId from username or email
+    // Booking model requires user as ObjectId — we must find the real user
+    const user = await User.findOne({
+      $or: [{ username }, { email }]
+    });
 
-    // Prepare booking details for email and PDF
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found. Please login again.',
+      });
+    }
+
+    // ✅ Calculate total from seat strings e.g. "Premium-3-9", "Executive-3-10"
     const seatText = seats.join(', ');
-    const total = seats.reduce((sum, seat) => {
+    const totalAmount = seats.reduce((sum, seat) => {
       if (seat.startsWith('Premium')) return sum + 250;
       if (seat.startsWith('Executive')) return sum + 200;
       return sum + 150;
     }, 0);
 
-    // Generate QR Code
+    // ✅ FIX: Create booking with only the fields the schema accepts
+    // seats field in schema expects ObjectIds — we store seat labels in qrCode/bookingReference
+    // and skip the seats array to avoid CastError
+    const booking = await Booking.create({
+      user: user._id,           // ✅ real ObjectId
+      show: user._id,           // ✅ placeholder — legacy bookings don't have a real showId
+      totalAmount,              // ✅ required field
+      email,
+      paymentStatus: 'completed',
+      bookingStatus: 'confirmed',
+      // Store seat info in qrCode field as JSON string (no schema change needed)
+      qrCode: JSON.stringify({
+        movieTitle,
+        city,
+        theaterName,
+        date,
+        time,
+        seats,
+      }),
+    });
+
+    console.log('📝 Booking created:', booking._id);
+
+    // ✅ Generate QR Code for ticket
     const qrData = await QRCode.toDataURL(
       `${movieTitle} | ${theaterName} | ${date} ${time} | Seats: ${seatText}`
     );
 
-    // Create PDF document
+    // ✅ Create PDF ticket
     const doc = new PDFDocument();
     const buffers = [];
 
@@ -244,7 +271,6 @@ export const createBookingWithEmail = async (req, res) => {
       try {
         const pdfData = Buffer.concat(buffers);
 
-        // Send email with PDF attachment
         await transporter.sendMail({
           from: process.env.EMAIL_USER,
           to: email,
@@ -258,7 +284,7 @@ export const createBookingWithEmail = async (req, res) => {
               <p><b>Date:</b> ${date}</p>
               <p><b>Time:</b> ${time}</p>
               <p><b>Seats:</b> ${seatText}</p>
-              <h3 style="color:green;">Total: ₹${total}</h3>
+              <h3 style="color:green;">Total: ₹${totalAmount}</h3>
               <p>🍿 Enjoy your show!</p>
             </div>
           `,
@@ -276,43 +302,41 @@ export const createBookingWithEmail = async (req, res) => {
       }
     });
 
-    // Design PDF ticket
-    doc
-      .fontSize(20)
-      .fillColor('#4f46e5')
-      .text('🎟️ Movie Ticket', {
-        align: 'center',
-      });
-
+    // ✅ Design PDF ticket
+    doc.fontSize(20).fillColor('#4f46e5').text('🎟️ Movie Ticket', { align: 'center' });
     doc.moveDown();
     doc.fillColor('black').fontSize(12);
-
     doc.text(`Movie: ${movieTitle}`);
     doc.text(`Theater: ${theaterName}`);
     doc.text(`City: ${city}`);
     doc.text(`Date: ${date}`);
     doc.text(`Time: ${time}`);
     doc.text(`Seats: ${seatText}`);
-
     doc.moveDown();
-    doc.fillColor('green').text(`Total: ₹${total}`);
-
+    doc.fillColor('green').text(`Total: ₹${totalAmount}`);
     doc.moveDown();
 
-    // Embed QR code in PDF
     const qrImage = qrData.replace(/^data:image\/png;base64,/, '');
-    doc.image(Buffer.from(qrImage, 'base64'), {
-      fit: [120, 120],
-      align: 'center',
-    });
-
+    doc.image(Buffer.from(qrImage, 'base64'), { fit: [120, 120], align: 'center' });
     doc.end();
 
     res.status(201).json({
       success: true,
       message: 'Booking created and email sent ✅',
-      booking,
+      booking: {
+        _id: booking._id,
+        bookingReference: booking.bookingReference,
+        movieTitle,
+        theaterName,
+        city,
+        date,
+        time,
+        seats,
+        totalAmount,
+        email,
+      },
     });
+
   } catch (error) {
     console.error('Booking error:', error);
     res.status(500).json({
@@ -329,17 +353,22 @@ export const getBookingHistoryLegacy = async (req, res) => {
   const { username } = req.params;
 
   try {
-    // Validate input
     if (!username) {
       return res.status(400).json({
         error: 'Username is required',
       });
     }
 
-    // Find all bookings for the user
-    const bookings = await Booking.find({ username }).sort({
-      createdAt: -1,
-    });
+    // ✅ FIX: Find user first, then find bookings by user ObjectId
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found',
+      });
+    }
+
+    const bookings = await Booking.find({ user: user._id }).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
