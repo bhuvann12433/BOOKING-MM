@@ -1,719 +1,259 @@
 import Seat from "../models/Seat.js";
 import Show from "../models/Show.js";
+import mongoose from "mongoose";
 
-// Get seat layout for a show
+const isValidObjectId = (id) =>
+  mongoose.Types.ObjectId.isValid(id) &&
+  id.length === 24 &&
+  /^[0-9a-f]+$/i.test(id);
+
+const DEFAULT_LAYOUT = {
+  premium:   { rows: 3, cols: 20 },
+  executive: { rows: 3, cols: 20 },
+  normal:    { rows: 3, cols: 20 },
+};
+
+const autoCreateSeats = async (showId) => {
+  const seats = [];
+  for (let r = 1; r <= DEFAULT_LAYOUT.premium.rows; r++)
+    for (let c = 1; c <= DEFAULT_LAYOUT.premium.cols; c++)
+      seats.push({ show: showId, seatNumber: `P${r}-${c}`, row: `${r}`, col: c, status: "available", booked: false });
+  for (let r = 1; r <= DEFAULT_LAYOUT.executive.rows; r++)
+    for (let c = 1; c <= DEFAULT_LAYOUT.executive.cols; c++)
+      seats.push({ show: showId, seatNumber: `E${r}-${c}`, row: `${r}`, col: c, status: "available", booked: false });
+  for (let r = 1; r <= DEFAULT_LAYOUT.normal.rows; r++)
+    for (let c = 1; c <= DEFAULT_LAYOUT.normal.cols; c++)
+      seats.push({ show: showId, seatNumber: `N${r}-${c}`, row: `${r}`, col: c, status: "available", booked: false });
+  await Seat.insertMany(seats, { ordered: false });
+  console.log(`✅ Auto-created ${seats.length} seats for show: ${showId}`);
+};
+
+const findSeatsByShow = (showId) => {
+  if (isValidObjectId(showId))
+    return Seat.find({ show: new mongoose.Types.ObjectId(showId) });
+  return Seat.find({ show: showId });
+};
+
+const releaseLocksSafe = async (showId) => {
+  try {
+    await Seat.updateMany(
+      { show: showId, status: "locked", lockExpiry: { $lt: new Date() } },
+      { status: "available", lockedBy: null, lockExpiry: null }
+    );
+  } catch (err) {
+    console.error("Lock release error:", err.message);
+  }
+};
+
+// ============================================
+// GET ALL SEATS — GET /seats?showId=xxx
+// ============================================
+export const getAllSeats = async (req, res) => {
+  try {
+    const { showId } = req.query;
+
+    if (!showId) {
+      return res.status(400).json({ success: false, error: "showId is required" });
+    }
+
+    // ✅ DEBUG LOG — compare this with booking log
+    console.log("=".repeat(50));
+    console.log("🔍 FETCH showId received:", showId);
+    console.log("🔍 FETCH showId type:", typeof showId);
+    console.log("=".repeat(50));
+
+    await releaseLocksSafe(showId);
+
+    let seats = await findSeatsByShow(showId).sort({ seatNumber: 1 });
+
+    console.log(`🔍 FETCH found ${seats.length} seats for showId: ${showId}`);
+
+    if (seats.length === 0) {
+      console.log(`🎬 Auto-creating seats for show: ${showId}`);
+      await autoCreateSeats(showId);
+      seats = await findSeatsByShow(showId).sort({ seatNumber: 1 });
+      console.log(`✅ After auto-create: ${seats.length} seats`);
+    } else {
+      const booked = seats.filter(s => s.status === "booked" || s.booked).length;
+      console.log(`📊 Seats: total=${seats.length} booked=${booked} available=${seats.length - booked}`);
+    }
+
+    res.status(200).json({ success: true, count: seats.length, data: seats });
+  } catch (error) {
+    console.error("getAllSeats error:", error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const bookSeat = async (req, res) => {
+  const { showId, seatNumber } = req.body;
+  try {
+    if (!showId || !seatNumber)
+      return res.status(400).json({ error: "showId and seatNumber are required" });
+    const seat = await Seat.findOne({ show: showId, seatNumber });
+    if (!seat) return res.status(404).json({ error: "Seat not found" });
+    if (seat.booked || seat.status === "booked")
+      return res.status(400).json({ error: "Seat already booked" });
+    seat.booked = true;
+    seat.status = "booked";
+    seat.bookedAt = new Date();
+    await seat.save();
+    res.status(200).json({ success: true, message: "Seat booked ✅", data: seat });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const markSeatsBooked = async (showId, seatNumbers) => {
+  try {
+    await Seat.updateMany(
+      { show: showId, seatNumber: { $in: seatNumbers } },
+      { status: "booked", booked: true, bookedAt: new Date(), lockedBy: null, lockExpiry: null }
+    );
+  } catch (err) {
+    console.error("markSeatsBooked error:", err.message);
+  }
+};
+
 export const getSeatLayout = async (req, res) => {
   try {
     const { showId } = req.params;
-
-    const seats = await Seat.find({ show: showId }).sort({ row: 1, col: 1 });
-
-    if (seats.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No seats found for this show",
-      });
-    }
-
-    // Organize seats by row
-    const seatsByRow = seats.reduce((acc, seat) => {
-      if (!acc[seat.row]) {
-        acc[seat.row] = [];
-      }
-      acc[seat.row].push(seat);
+    const seats = await findSeatsByShow(showId).sort({ row: 1, col: 1 });
+    if (!seats.length)
+      return res.status(404).json({ success: false, message: "No seats found" });
+    const seatsByRow = seats.reduce((acc, s) => {
+      if (!acc[s.row]) acc[s.row] = [];
+      acc[s.row].push(s);
       return acc;
     }, {});
-
-    res.status(200).json({
-      success: true,
-      data: {
-        totalSeats: seats.length,
-        seatsByRow,
-        seats,
-      },
-    });
+    res.status(200).json({ success: true, data: { totalSeats: seats.length, seatsByRow, seats } });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Get available seats for a show
 export const getAvailableSeats = async (req, res) => {
   try {
-    const { showId } = req.params;
-
-    const availableSeats = await Seat.find({
-      show: showId,
-      status: "available",
-    }).sort({ row: 1, col: 1 });
-
-    res.status(200).json({
-      success: true,
-      count: availableSeats.length,
-      data: availableSeats,
-    });
+    const seats = await Seat.find({ show: req.params.showId, status: "available" }).sort({ row: 1, col: 1 });
+    res.status(200).json({ success: true, count: seats.length, data: seats });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Get booked seats for a show
 export const getBookedSeats = async (req, res) => {
   try {
-    const { showId } = req.params;
-
-    const bookedSeats = await Seat.find({
-      show: showId,
-      status: "booked",
-    }).sort({ row: 1, col: 1 });
-
-    res.status(200).json({
-      success: true,
-      count: bookedSeats.length,
-      data: bookedSeats,
-    });
+    const seats = await Seat.find({ show: req.params.showId, status: "booked" }).sort({ row: 1, col: 1 });
+    res.status(200).json({ success: true, count: seats.length, data: seats });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Check seat availability
 export const checkSeatAvailability = async (req, res) => {
   try {
-    const { seatIds } = req.body;
-
-    const unavailableSeats = await Seat.find({
-      _id: { $in: seatIds },
-      status: { $ne: "available" },
-    });
-
-    if (unavailableSeats.length > 0) {
-      return res.status(200).json({
-        success: false,
-        available: false,
-        message: "Some seats are not available",
-        unavailableSeats,
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      available: true,
-      message: "All seats are available",
-    });
+    const unavailable = await Seat.find({ _id: { $in: req.body.seatIds }, status: { $ne: "available" } });
+    if (unavailable.length > 0)
+      return res.status(200).json({ success: false, available: false, unavailableSeats: unavailable });
+    res.status(200).json({ success: true, available: true });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-/**
- * LEGACY ENDPOINTS (from original server.js)
- * Kept for backward compatibility
- */
-
-/**
- * Get All Seats (Legacy)
- * @route GET /seats
- */
-export const getAllSeats = async (req, res) => {
-  try {
-    const seats = await Seat.find().sort({
-      section: 1,
-      row: 1,
-      col: 1,
-    });
-
-    res.status(200).json({
-      success: true,
-      count: seats.length,
-      data: seats,
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: error.message || 'Failed to fetch seats',
-    });
-  }
-};
-
-/**
- * Book a Seat (Legacy)
- * @route POST /book-seat
- * Marks a specific seat as booked
- */
-export const bookSeat = async (req, res) => {
-  const { section, row, col } = req.body;
-
-  try {
-    // Validate input
-    if (!section || row === undefined || col === undefined) {
-      return res.status(400).json({
-        error: 'Section, row, and column are required',
-      });
-    }
-
-    // Find seat
-    const seat = await Seat.findOne({
-      section,
-      row: Number(row),
-      col: Number(col),
-    });
-
-    // Check if seat exists
-    if (!seat) {
-      return res.status(404).json({
-        error: 'Seat not found',
-      });
-    }
-
-    // Check if seat is already booked
-    if (seat.booked) {
-      return res.status(400).json({
-        error: 'Seat already booked',
-      });
-    }
-
-    // Mark seat as booked
-    seat.booked = true;
-    await seat.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Seat booked successfully ✅',
-      data: seat,
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: error.message || 'Booking failed',
-    });
-  }
-};
-
-// ============================================
-// ADVANCED SEAT LOCKING SYSTEM (Real-time Safety)
-// ============================================
-
-/**
- * LOCK SEATS - Real-time Seat Reservation
- * 
- * POST /api/seats/lock
- * 
- * When user selects seats:
- * 1. Check if seats are available
- * 2. If available → Mark as "locked" with userId and 5-min expiry
- * 3. If locked by another user → Reject (seat unavailable)
- * 4. If lock expired → Treat as available and lock for current user
- * 
- * Uses atomic findOneAndUpdate to prevent race conditions
- * 
- * @param {string} showId - Show ID
- * @param {string[]} seatNumbers - Array of seat numbers ["A1", "A2", "B1"]
- * @param {string} userId - User ID locking the seats
- * @returns {Object} { success, lockedSeats[], failedSeats[], message }
- */
 export const lockSeats = async (req, res) => {
   try {
     const { showId, seatNumbers, userId } = req.body;
-
-    // ============================================
-    // VALIDATION
-    // ============================================
-    if (!showId || !seatNumbers || !Array.isArray(seatNumbers) || !userId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Required: showId, seatNumbers (array), userId'
-      });
-    }
-
-    if (seatNumbers.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'At least one seat required'
-      });
-    }
-
-    if (seatNumbers.length > 10) {
-      return res.status(400).json({
-        success: false,
-        message: 'Maximum 10 seats can be locked at once'
-      });
-    }
-
-    // ============================================
-    // RELEASE EXPIRED LOCKS (Cleanup)
-    // ============================================
-    // Before attempting to lock, release any expired locks in this show
-    await Seat.releaseExpiredLocks(showId);
-
-    // ============================================
-    // ATTEMPT TO LOCK EACH SEAT (Atomically)
-    // ============================================
-    const lockedSeats = [];
-    const failedSeats = [];
-
+    if (!showId || !seatNumbers || !Array.isArray(seatNumbers) || !userId)
+      return res.status(400).json({ success: false, message: "Required: showId, seatNumbers, userId" });
+    await releaseLocksSafe(showId);
+    const lockedSeats = [], failedSeats = [];
     for (const seatNumber of seatNumbers) {
-      try {
-        // Atomic operation: Lock seat only if available
-        const updatedSeat = await Seat.atomicLock(
-          showId,
-          seatNumber,
-          userId,
-          300 // 5 minutes lock duration
-        );
-
-        if (updatedSeat) {
-          lockedSeats.push({
-            _id: updatedSeat._id,
-            seatNumber: updatedSeat.seatNumber,
-            row: updatedSeat.row,
-            col: updatedSeat.col,
-            status: updatedSeat.status,
-            lockExpiry: updatedSeat.lockExpiry,
-            lockRemainingSeconds: updatedSeat.lockRemainingSeconds
-          });
-        } else {
-          // Lock failed - seat unavailable or locked by another user
-          const existingSeat = await Seat.findOne({
-            show: showId,
-            seatNumber
-          });
-
-          failedSeats.push({
-            seatNumber,
-            reason: existingSeat?.status === 'locked' 
-              ? 'Locked by another user'
-              : existingSeat?.status === 'booked'
-              ? 'Already booked'
-              : 'Unavailable',
-            currentStatus: existingSeat?.status || 'unknown'
-          });
-        }
-      } catch (error) {
-        failedSeats.push({
-          seatNumber,
-          reason: error.message,
-          error: 'Lock operation failed'
-        });
-      }
+      const lockExpiry = new Date(Date.now() + 300 * 1000);
+      const updated = await Seat.findOneAndUpdate(
+        { show: showId, seatNumber, $or: [{ status: "available" }, { status: "locked", lockExpiry: { $lt: new Date() } }] },
+        { status: "locked", lockedBy: userId, lockExpiry },
+        { new: true }
+      );
+      if (updated) lockedSeats.push({ seatNumber });
+      else failedSeats.push({ seatNumber, reason: "Unavailable" });
     }
-
-    // ============================================
-    // RESPONSE
-    // ============================================
-    const allLocked = failedSeats.length === 0;
-    const partialLock = lockedSeats.length > 0 && failedSeats.length > 0;
-
-    if (failedSeats.length === seatNumbers.length) {
-      // All seats failed
-      return res.status(409).json({
-        success: false,
-        message: 'Could not lock any seats',
-        lockedCount: 0,
-        failedCount: seatNumbers.length,
-        lockedSeats: [],
-        failedSeats
-      });
-    }
-
-    res.status(allLocked ? 200 : 207).json({
-      success: allLocked,
-      message: allLocked 
-        ? `All ${seatNumbers.length} seats locked successfully`
-        : partialLock
-        ? `${lockedSeats.length} seats locked, ${failedSeats.length} failed`
-        : 'Some seats could not be locked',
-      lockedCount: lockedSeats.length,
-      failedCount: failedSeats.length,
-      lockedSeats,
-      failedSeats,
-      lockDurationSeconds: 300
-    });
-
+    res.status(200).json({ success: failedSeats.length === 0, lockedSeats, failedSeats });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-      error: 'Lock operation failed'
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-/**
- * GET SEAT STATUS BY SHOW
- * 
- * GET /api/seats/:showId
- * 
- * Returns:
- * 1. Seat layout organized by row
- * 2. Statistics (available, locked, booked count)
- * 3. Individual seat details with lock info
- * 
- * Automatically releases expired locks before returning data
- * 
- * @param {string} showId - Show ID
- * @returns {Object} { seatLayout, statistics, seats[] }
- */
 export const getSeatsByShow = async (req, res) => {
   try {
     const { showId } = req.params;
-
-    if (!showId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Show ID required'
-      });
-    }
-
-    // ============================================
-    // RELEASE EXPIRED LOCKS (Cleanup)
-    // ============================================
-    const releaseResult = await Seat.releaseExpiredLocks(showId);
-    if (releaseResult.modifiedCount > 0) {
-      console.log(
-        `[SEAT CLEANUP] Released ${releaseResult.modifiedCount} expired locks for show ${showId}`
-      );
-    }
-
-    // ============================================
-    // GET SEAT STATISTICS
-    // ============================================
-    const statistics = await Seat.getShowStatistics(showId);
-
-    // ============================================
-    // GET ALL SEATS
-    // ============================================
-    const seats = await Seat.find({ show: showId })
-      .sort({ row: 1, col: 1 })
-      .select(
-        'seatNumber row col status lockedBy lockExpiry lockRemainingSeconds bookedBy bookedAt -booked -blocked'
-      );
-
-    if (seats.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'No seats found for this show'
-      });
-    }
-
-    // ============================================
-    // ORGANIZE SEATS BY ROW (for UI)
-    // ============================================
-    const seatsByRow = seats.reduce((acc, seat) => {
-      if (!acc[seat.row]) {
-        acc[seat.row] = [];
-      }
-      acc[seat.row].push({
-        _id: seat._id,
-        seatNumber: seat.seatNumber,
-        row: seat.row,
-        col: seat.col,
-        status: seat.status,
-        isLocked: seat.status === 'locked',
-        isBooked: seat.status === 'booked',
-        lockRemainingSeconds: seat.lockRemainingSeconds,
-        bookedAt: seat.bookedAt
-      });
+    await releaseLocksSafe(showId);
+    const seats = await findSeatsByShow(showId).sort({ row: 1, col: 1 });
+    if (!seats.length)
+      return res.status(404).json({ success: false, message: "No seats found" });
+    const seatsByRow = seats.reduce((acc, s) => {
+      if (!acc[s.row]) acc[s.row] = [];
+      acc[s.row].push(s);
       return acc;
     }, {});
-
-    // ============================================
-    // RESPONSE
-    // ============================================
-    res.status(200).json({
-      success: true,
-      showId,
-      seatLayout: seatsByRow,
-      statistics: {
-        total: statistics.total,
-        available: statistics.available,
-        locked: statistics.locked,
-        booked: statistics.booked,
-        occupancyPercentage: Math.round(
-          ((statistics.locked + statistics.booked) / statistics.total) * 100
-        )
-      },
-      seats: seats.map(seat => ({
-        _id: seat._id,
-        seatNumber: seat.seatNumber,
-        row: seat.row,
-        col: seat.col,
-        status: seat.status,
-        lockRemainingSeconds: seat.lockRemainingSeconds
-      }))
-    });
-
+    res.status(200).json({ success: true, showId, seatLayout: seatsByRow, seats });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-      error: 'Failed to retrieve seat status'
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-/**
- * BOOK SEATS - Finalize Seat Reservation
- * 
- * POST /api/seats/book
- * 
- * Converts locked seats to booked:
- * 1. Check each seat is locked by same userId
- * 2. Check lock has not expired
- * 3. If valid → Update to "booked" status
- * 4. If invalid → Return error (user cannot book)
- * 
- * Uses atomic findOneAndUpdate to prevent race conditions
- * 
- * @param {string} showId - Show ID
- * @param {string[]} seatNumbers - Seat numbers to book
- * @param {string} userId - User ID (must match who locked)
- * @param {string} bookingId - Reference to booking document
- * @returns {Object} { success, bookedSeats[], failedSeats[], message }
- */
-export const bookSeatsAtomic = async (req, res) => {
-  try {
-    const { showId, seatNumbers, userId, bookingId } = req.body;
-
-    // ============================================
-    // VALIDATION
-    // ============================================
-    if (!showId || !seatNumbers || !Array.isArray(seatNumbers) || !userId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Required: showId, seatNumbers (array), userId'
-      });
-    }
-
-    if (seatNumbers.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'At least one seat required'
-      });
-    }
-
-    // ============================================
-    // BOOK EACH SEAT (Atomically)
-    // ============================================
-    const bookedSeats = [];
-    const failedSeats = [];
-
-    for (const seatNumber of seatNumbers) {
-      try {
-        // Atomic operation: Book seat only if locked by same user AND lock not expired
-        const updatedSeat = await Seat.atomicBook(
-          showId,
-          seatNumber,
-          userId,
-          bookingId
-        );
-
-        if (updatedSeat) {
-          bookedSeats.push({
-            _id: updatedSeat._id,
-            seatNumber: updatedSeat.seatNumber,
-            row: updatedSeat.row,
-            col: updatedSeat.col,
-            status: updatedSeat.status,
-            bookedBy: updatedSeat.bookedBy,
-            bookedAt: updatedSeat.bookedAt
-          });
-        } else {
-          // Book failed - seat not locked, lock expired, or locked by different user
-          const existingSeat = await Seat.findOne({
-            show: showId,
-            seatNumber
-          });
-
-          let reason = 'Unknown error';
-          if (existingSeat?.status === 'available') {
-            reason = 'Seat not locked (lock expired or never locked)';
-          } else if (existingSeat?.status === 'booked') {
-            reason = 'Seat already booked';
-          } else if (existingSeat?.status === 'locked' && existingSeat.lockedBy?.toString() !== userId) {
-            reason = 'Locked by different user';
-          } else if (
-            existingSeat?.status === 'locked' &&
-            existingSeat.lockExpiry &&
-            new Date() > existingSeat.lockExpiry
-          ) {
-            reason = 'Lock expired (try locking again)';
-          }
-
-          failedSeats.push({
-            seatNumber,
-            reason,
-            currentStatus: existingSeat?.status
-          });
-        }
-      } catch (error) {
-        failedSeats.push({
-          seatNumber,
-          reason: error.message,
-          error: 'Book operation failed'
-        });
-      }
-    }
-
-    // ============================================
-    // RESPONSE
-    // ============================================
-    const allBooked = failedSeats.length === 0;
-
-    if (failedSeats.length === seatNumbers.length) {
-      // All seats failed
-      return res.status(409).json({
-        success: false,
-        message: 'Could not book any seats',
-        bookedCount: 0,
-        failedCount: seatNumbers.length,
-        bookedSeats: [],
-        failedSeats
-      });
-    }
-
-    res.status(allBooked ? 200 : 207).json({
-      success: allBooked,
-      message: allBooked
-        ? `All ${seatNumbers.length} seats booked successfully`
-        : `${bookedSeats.length} seats booked, ${failedSeats.length} failed`,
-      bookedCount: bookedSeats.length,
-      failedCount: failedSeats.length,
-      bookedSeats,
-      failedSeats
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-      error: 'Booking operation failed'
-    });
-  }
-};
-
-/**
- * UNLOCK SEATS - Release User Locks
- * 
- * POST /api/seats/unlock
- * 
- * User cancels seat selection (releases lock manually)
- * Only unlocks if locked by same user
- * 
- * @param {string} showId - Show ID
- * @param {string[]} seatNumbers - Seats to unlock
- * @param {string} userId - User who locked them
- * @returns {Object} { success, unlockedSeats[], message }
- */
 export const unlockSeats = async (req, res) => {
   try {
     const { showId, seatNumbers, userId } = req.body;
-
-    if (!showId || !seatNumbers || !Array.isArray(seatNumbers) || !userId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Required: showId, seatNumbers (array), userId'
-      });
-    }
-
-    const unlockedSeats = [];
-    const failedSeats = [];
-
+    if (!showId || !seatNumbers || !Array.isArray(seatNumbers) || !userId)
+      return res.status(400).json({ success: false, message: "Required: showId, seatNumbers, userId" });
+    const unlockedSeats = [], failedSeats = [];
     for (const seatNumber of seatNumbers) {
       const result = await Seat.findOneAndUpdate(
-        {
-          show: showId,
-          seatNumber,
-          status: 'locked',
-          lockedBy: userId
-        },
-        {
-          status: 'available',
-          lockedBy: null,
-          lockExpiry: null,
-          updatedAt: new Date()
-        },
+        { show: showId, seatNumber, status: "locked", lockedBy: userId },
+        { status: "available", lockedBy: null, lockExpiry: null },
         { new: true }
       );
-
-      if (result) {
-        unlockedSeats.push({
-          seatNumber: result.seatNumber,
-          row: result.row,
-          col: result.col,
-          status: result.status
-        });
-      } else {
-        failedSeats.push({
-          seatNumber,
-          reason: 'Seat not locked by you or does not exist'
-        });
-      }
+      if (result) unlockedSeats.push({ seatNumber });
+      else failedSeats.push({ seatNumber, reason: "Not locked by you" });
     }
-
-    res.status(200).json({
-      success: failedSeats.length === 0,
-      message: `${unlockedSeats.length} seats unlocked${failedSeats.length > 0 ? `, ${failedSeats.length} failed` : ''}`,
-      unlockedSeats,
-      failedSeats
-    });
-
+    res.status(200).json({ success: true, unlockedSeats, failedSeats });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-      error: 'Unlock operation failed'
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-/**
- * RELEASE ALL EXPIRED LOCKS - Maintenance
- * 
- * POST /api/seats/maintenance/release-expired
- * 
- * Call this periodically (or setup cron job)
- * Releases all locks that have expired across all shows
- * 
- * @returns {Object} { success, releasedCount, message }
- */
+export const bookSeatsAtomic = async (req, res) => {
+  try {
+    const { showId, seatNumbers, userId, bookingId } = req.body;
+    if (!showId || !seatNumbers || !Array.isArray(seatNumbers) || !userId)
+      return res.status(400).json({ success: false, message: "Required: showId, seatNumbers, userId" });
+    const bookedSeats = [], failedSeats = [];
+    for (const seatNumber of seatNumbers) {
+      const updated = await Seat.findOneAndUpdate(
+        { show: showId, seatNumber, status: "locked", lockedBy: userId, lockExpiry: { $gt: new Date() } },
+        { status: "booked", bookedBy: userId, bookingReference: bookingId, bookedAt: new Date(), booked: true },
+        { new: true }
+      );
+      if (updated) bookedSeats.push({ seatNumber });
+      else failedSeats.push({ seatNumber, reason: "Lock expired or wrong user" });
+    }
+    res.status(bookedSeats.length === 0 ? 409 : 200).json({
+      success: failedSeats.length === 0, bookedSeats, failedSeats,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const releaseExpiredLocksManual = async (req, res) => {
   try {
     const result = await Seat.updateMany(
-      {
-        status: 'locked',
-        lockExpiry: { $lt: new Date() }
-      },
-      {
-        status: 'available',
-        lockedBy: null,
-        lockExpiry: null,
-        updatedAt: new Date()
-      }
+      { status: "locked", lockExpiry: { $lt: new Date() } },
+      { status: "available", lockedBy: null, lockExpiry: null }
     );
-
-    res.status(200).json({
-      success: true,
-      message: `Released ${result.modifiedCount} expired locks`,
-      releasedCount: result.modifiedCount,
-      timestamp: new Date()
-    });
-
+    res.status(200).json({ success: true, releasedCount: result.modifiedCount });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-      error: 'Failed to release expired locks'
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };

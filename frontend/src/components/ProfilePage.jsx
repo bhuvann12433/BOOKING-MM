@@ -32,6 +32,15 @@ function ProfilePage() {
     if (username) fetchBookingHistory();
   }, [username]);
 
+  // ✅ FIX: Correct price calculation for both old and new seat formats
+  // New format: "P1-1", "E2-3", "N3-5"
+  // Old format: "Premium-1-1", "Executive-2-3", "Normal-3-5"
+  const getSeatPrice = (seat) => {
+    if (seat.startsWith("P") || seat.startsWith("Premium")) return 250;
+    if (seat.startsWith("E") || seat.startsWith("Executive")) return 200;
+    return 150; // Normal seats
+  };
+
   const parse = (b) => {
     if (b.qrCode) {
       try {
@@ -44,8 +53,8 @@ function ProfilePage() {
           date: p.date || "N/A",
           time: p.time || "N/A",
           seats,
-          total: seats.reduce((s, x) =>
-            s + (x.startsWith("Premium") ? 250 : x.startsWith("Executive") ? 200 : 150), 0),
+          // ✅ Use getSeatPrice for correct calculation
+          total: seats.reduce((s, x) => s + getSeatPrice(x), 0),
         };
       } catch {}
     }
@@ -69,7 +78,7 @@ function ProfilePage() {
   return (
     <div className="pp-page">
 
-      {/* ── BANNER ── */}
+      {/* BANNER */}
       <div className="pp-banner">
         <div className="pp-avatar-wrap">
           <div className="pp-avatar-inner">{initials}</div>
@@ -96,7 +105,7 @@ function ProfilePage() {
         </div>
       </div>
 
-      {/* ── SECTION HEAD ── */}
+      {/* SECTION HEAD */}
       <div className="pp-sec-head">
         <FaHistory style={{ color: "#00ffd5", fontSize: 11, flexShrink: 0 }} />
         <span className="pp-sec-title">Booking History</span>
@@ -104,7 +113,7 @@ function ProfilePage() {
         <span className="pp-sec-count">{bookingHistory.length}</span>
       </div>
 
-      {/* ── CONTENT ── */}
+      {/* CONTENT */}
       {loading ? (
         <div className="pp-loading">Loading...</div>
       ) : bookingHistory.length === 0 ? (
@@ -150,21 +159,24 @@ function ProfilePage() {
                     </div>
                     <div className="pp-info-item">
                       <span className="pp-info-key">Total</span>
-                      <span className="pp-info-val teal">₹{d.total}</span>
+                      {/* ✅ Show totalAmount from DB if available, else calculated */}
+                      <span className="pp-info-val teal">
+                        ₹{booking.totalAmount || d.total}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="pp-card-footer">
-                    <div className="pp-seats">
-                      {d.seats.length > 0 && (
+                  {d.seats.length > 0 && (
+                    <div className="pp-card-footer">
+                      <div className="pp-seats">
                         <span className="pp-seat-key">Seats</span>
-                      )}
-                      {d.seats.map((s, j) => (
-                        <span key={j} className="pp-seat-chip">{s}</span>
-                      ))}
+                        {d.seats.map((s, j) => (
+                          <span key={j} className="pp-seat-chip">{s}</span>
+                        ))}
+                      </div>
+                      <span className="pp-view-hint">View ticket →</span>
                     </div>
-                    <span className="pp-view-hint">View ticket →</span>
-                  </div>
+                  )}
 
                 </div>
               </div>

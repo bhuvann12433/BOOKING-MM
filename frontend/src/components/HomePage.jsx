@@ -22,6 +22,22 @@ const FALLBACK_MOVIES = [
   { src: dakuimg1, rating: "4.6", title: "Daku Maharaj", language: "Telugu", cert: "UA13+" },
   { src: second, rating: "4.8", title: "Game Changer", language: "Telugu", cert: "UA13+" },
   { src: virupaksha, rating: "4.7", title: "Virupaksha", language: "Telugu", cert: "UA13+" },
+   {
+    src: "https://akamaividz2.zee5.com/image/upload/w_504,h_756,c_scale,f_auto,q_auto/resources/0-0-59409/portrait/jersey_trailer_1920x770.jpg",
+    rating: "4.9",
+    title: "Jersey",
+    language: "Telugu",
+    cert: "UA13+",
+    trailer: "https://www.youtube.com/embed/AjAe_Q1WZ_8"
+  },
+  {
+  src: "https://stat4.bollywoodhungama.in/wp-content/uploads/2025/08/The-Paradise-01.jpg",
+  rating: "4.8",
+  title: "The Paradise",
+  language: "Telugu",
+  cert: "UA16+",
+  trailer: "https://www.youtube.com/embed/kGciUxE_i4w"
+},
 ];
 
 function HomePage() {
@@ -31,6 +47,7 @@ function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("Movies");
   const [hovered, setHovered] = useState(null);
+  const [unmutedIndex, setUnmutedIndex] = useState(null);
 
   // ============================================
   // STATE MANAGEMENT
@@ -212,12 +229,25 @@ function HomePage() {
                   onMouseLeave={() => setHovered(null)}
                 >
                   {hovered === i && movie.trailer ? (
-                    <iframe
-                      src={`${movie.trailer}?autoplay=1&controls=1`}
-                      title={movie.title}
-                      className="hp-card-img"
-                      allow="autoplay"
-                    />
+                   <>
+  <iframe
+    src={`${movie.trailer}?autoplay=1&mute=${unmutedIndex === i ? 0 : 1}&controls=0&playsinline=1`}
+    title={movie.title}
+    className="hp-card-img"
+    allow="autoplay; encrypted-media"
+  />
+
+  {/* 🔊 UNMUTE BUTTON */}
+  <button
+    className="hp-unmute-btn"
+    onClick={(e) => {
+      e.stopPropagation();
+      setUnmutedIndex(i);
+    }}
+  >
+    🔊
+  </button>
+</>
                   ) : (
                     <img
                       src={movie.src}
