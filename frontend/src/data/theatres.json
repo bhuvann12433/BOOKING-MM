@@ -10,10 +10,6 @@
     { "name": "Swamy Theatre", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] },
     { "name": "Hollywood Theatre", "shows": ["10:30 AM", "2:30 PM", "6:30 PM"] }
   ],
-  "Narasaraopet": [
-    { "name": "Eswar Mahal", "shows": ["11:00 AM", "3:00 PM", "8:00 PM"] },
-    { "name": "Sri Srinivasa Theatre", "shows": ["10:30 AM", "2:30 PM", "7:30 PM"] }
-  ],
   "Visakhapatnam": [
     { "name": "INOX (CMBT)", "shows": ["10:00 AM", "1:30 PM", "6:00 PM", "9:30 PM"] },
     { "name": "PVR (Cinepolis Vizag)", "shows": ["11:00 AM", "3:00 PM", "7:30 PM"] },
@@ -43,7 +39,6 @@
     { "name": "Ambica Theatre", "shows": ["11:00 AM", "3:00 PM", "8:00 PM"] },
     { "name": "Satyanarayana Theatre", "shows": ["10:30 AM", "2:30 PM", "7:30 PM"] }
   ],
-
   "Hyderabad": [
     { "name": "AMB Cinemas", "shows": ["10:00 AM", "1:30 PM", "6:30 PM", "10:00 PM"] },
     { "name": "Prasads IMAX", "shows": ["9:00 AM", "2:00 PM", "8:00 PM"] },
@@ -66,5 +61,744 @@
   "Nizamabad": [
     { "name": "Asian Mukunda Cinemas", "shows": ["10:30 AM", "2:30 PM", "7:30 PM"] },
     { "name": "Rama Theatre", "shows": ["11:30 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Ponduru (Srikakulam)": [
+    { "name": "Urvasi DTS Theatre KVR Cinemas S-1", "shows": ["11:00 AM", "2:30 PM", "9:30 PM"] },
+    { "name": "Urvasi DTS Theatre KVR Cinemas S-2", "shows": ["11:15 AM", "6:30 PM", "9:45 PM"] }
+  ],
+  "Kotabommali (Srikakulam)": [
+    { "name": "Sri Siva Krishna Picture Palace", "shows": ["2:30 PM", "6:30 PM"] }
+  ],
+  "Poosapatirega (Vizianagaram)": [
+    { "name": "Sri Sai Krishna Theatre Screen-1", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sai Sri Krishna Theatre Screen-2", "shows": ["11:30 AM", "2:45 PM", "9:30 PM"] }
+  ],
+  "Srungavarapukota (Vizianagaram)": [
+    { "name": "Sri Srinivasa Mahal Theatre", "shows": ["2:30 PM", "9:30 PM"] },
+    { "name": "Sri Venkateswara Theatre", "shows": ["11:00 AM", "6:30 PM"] }
+  ],
+  "Cheepurupalli (Vizianagaram)": [
+    { "name": "Vamsi A/C DTS", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vishnu A/C DTS", "shows": ["11:30 AM", "6:30 PM", "9:30 PM"] },
+    { "name": "Vaibhav A/C Theatre", "shows": ["2:30 PM", "9:30 PM"] },
+    { "name": "Amogh A/C DTS 35MM", "shows": ["11:00 AM", "6:30 PM"] }
+  ],
+  "Nellimarla (Vizianagaram)": [
+    { "name": "Sri Satya Theatre", "shows": ["2:30 PM", "6:30 PM", "9:30 PM"] }
+  ],
+  "Bhogapuram (Vizianagaram)": [
+    { "name": "Gopalakrishna Theatre", "shows": ["11:00 AM", "2:30 PM"] }
+  ],
+  "Gajapathinagaram (Vizianagaram)": [
+    { "name": "Surya Mahal", "shows": ["2:30 PM", "6:30 PM"] },
+    { "name": "Gangaraj Kala Mandir Theatre", "shows": ["11:00 AM", "9:30 PM"] }
+  ],
+  "Gajuwaka (Visakhapatnam)": [
+    { "name": "Theatre Sreekanya A/C", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sree Kanya A/C Theatre", "shows": ["11:30 AM", "6:45 PM", "9:45 PM"] }
+  ],
+  "Maddilapalem (Visakhapatnam)": [
+    { "name": "Kameswari AC DTS Theatre", "shows": ["11:00 AM", "2:30 PM", "9:30 PM"] },
+    { "name": "Kinnera Theatre", "shows": ["11:15 AM", "6:30 PM", "9:45 PM"] }
+  ],
+  "Chodavaram (Anakapalli)": [
+    { "name": "Sri Lakshmi Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sai Lakshmi A/C DTS", "shows": ["2:30 PM", "6:30 PM", "9:30 PM"] },
+    { "name": "Sri Sai Lakshmi A/C DTS", "shows": ["11:30 AM", "2:45 PM", "9:45 PM"] }
+  ],
+  "Narsipatnam (Anakapalli)": [
+    { "name": "Mini Kanya A/C Theatre", "shows": ["11:00 AM", "2:30 PM"] },
+    { "name": "Kanya Theatre", "shows": ["6:30 PM", "9:30 PM"] },
+    { "name": "Sai Sree Kanya A/C Theatre", "shows": ["11:30 AM", "6:30 PM", "9:45 PM"] },
+    { "name": "Sree Kanya Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Jaggampeta (Kakinada)": [
+    { "name": "Theatre Krishnaveni", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sri Rajaveni Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] },
+    { "name": "JVR Cinemas Screen-1", "shows": ["11:00 AM", "2:30 PM", "9:45 PM"] },
+    { "name": "JVR Cinemas Screen-2", "shows": ["11:30 AM", "6:30 PM", "9:30 PM"] },
+    { "name": "Nageswara Theatre", "shows": ["2:30 PM", "6:30 PM"] }
+  ],
+  "Ravulapalem (Konaseema)": [
+    { "name": "Akshara Cinemas Screen-1", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Akshara Cinemas Screen-2", "shows": ["11:30 AM", "6:45 PM", "9:45 PM"] },
+    { "name": "Padmasree Theatre", "shows": ["2:30 PM", "9:30 PM"] },
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "6:30 PM"] }
+  ],
+  "Razole/Tatipaka (Konaseema)": [
+    { "name": "Annapurna Theatre", "shows": ["11:00 AM", "2:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["6:30 PM", "9:30 PM"] },
+    { "name": "Four Shows Cine Complex A/C-1", "shows": ["11:00 AM", "6:30 PM", "9:45 PM"] },
+    { "name": "Four Shows Cine Complex A/C-2", "shows": ["11:30 AM", "2:30 PM", "9:30 PM"] }
+  ],
+  "Kovvuru (East Godavari)": [
+    { "name": "Gayathree Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "YSTD Centre Miniplex Screen-1", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] },
+    { "name": "Ananay Theatre A/C", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Ibrahimpatnam (NTR Dist)": [
+    { "name": "Sri Swarna Deluxe", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sri Venkateswara Deluxe", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Nandigama (NTR Dist)": [
+    { "name": "Sri Lakshmi Prasana", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Picture Palace", "shows": ["11:30 AM", "6:45 PM", "9:45 PM"] }
+  ],
+  "Sattenapalli (Palnadu)": [
+    { "name": "Eswar Sai Deluxe", "shows": ["11:00 AM", "2:30 PM"] },
+    { "name": "Sai Krishna DTS", "shows": ["6:30 PM", "9:30 PM"] },
+    { "name": "Srinivasa Mahal", "shows": ["11:15 AM", "2:45 PM", "6:30 PM"] },
+    { "name": "Sri Lakshmi Talkies", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Markapuram (Prakasam)": [
+    { "name": "Srinivasa KB Cinimax", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Besthavaripeta Theater", "shows": ["11:15 AM", "6:45 PM"] }
+  ],
+  "Podili (Prakasam)": [
+    { "name": "Sri Venkateswara Picture Palace", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sri Raghavendra Picture Palace", "shows": ["2:30 PM", "9:30 PM"] },
+    { "name": "Harikrishna Super Deluxe", "shows": ["11:30 AM", "2:45 PM", "9:45 PM"] }
+  ],
+  "Pamur (Prakasam)": [
+    { "name": "Sesha Mahal Theatre", "shows": ["2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa KB Cinimax", "shows": ["11:00 AM", "9:30 PM"] }
+  ],
+  "Kavali (Nellore)": [
+    { "name": "Latha Cine Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] },
+    { "name": "Sravanthi Cinema", "shows": ["2:30 PM", "9:45 PM"] }
+  ],
+  "Koilakuntla (Nandyal)": [
+    { "name": "AVR Mini Picture Palace", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sri Lakshmi Venkateswara Talkies", "shows": ["2:30 PM", "9:30 PM"] },
+    { "name": "Panduranga Picture Palace", "shows": ["11:15 AM", "2:45 PM", "9:45 PM"] }
+  ],
+  "Pamidi (Ananthapuramu)": [
+    { "name": "Sri Hanuman Picture Palace", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Manju Picture Palace", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Piler (Annamayya)": [
+    { "name": "Ajantha Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Shukkur Picture Palace", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Rayachoti (Annamayya)": [
+    { "name": "Sai Picture Palace A/C", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Goutam Picture Palace A/C", "shows": ["11:30 AM", "6:45 PM", "9:45 PM"] },
+    { "name": "Prasad Picture Palace A/C", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Sullurpeta (Tirupati)": [
+    { "name": "V EPLQ Screen-1", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "V EPLQ Screen-2", "shows": ["11:15 AM", "2:45 PM", "9:30 PM"] },
+    { "name": "V EPLQ Screen-3", "shows": ["11:30 AM", "6:45 PM", "9:45 PM"] },
+    { "name": "N.V.R. Cinema Theatre", "shows": ["11:00 AM", "6:30 PM"] }
+  ],
+  "Armoor (Nizamabad)": [
+    { "name": "PVR Cinema (Jeevan Reddy Mall)", "shows": ["11:00 AM", "2:30 PM", "6:30 PM", "9:45 PM"] },
+    { "name": "Venkateshwara Cinema Hall", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] },
+    { "name": "Brundhavan Cinema Hall", "shows": ["2:30 PM", "9:45 PM"] }
+  ],
+  "Bhainsa (Nirmal)": [
+    { "name": "Kamala Theatre", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Kamala Cinema Hall", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Khanapur (Nirmal)": [
+    { "name": "Laxmi 70 MM Cinema Hall", "shows": ["11:15 AM", "2:45 PM", "6:30 PM"] },
+    { "name": "Laxmi Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Metpally/Koratla (Jagtial)": [
+    { "name": "Laxmi Cinema Hall", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sai Krishna Cinema Hall", "shows": ["11:30 AM", "6:45 PM", "9:30 PM"] },
+    { "name": "Raj Kalamandir", "shows": ["2:30 PM", "9:45 PM"] }
+  ],
+  "Vemulawada (Rajanna Sircilla)": [
+    { "name": "Raja Rajeswara Theatre", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Shiva Rama Krishna Cinema Hall", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Manuguru (Bhadradri Kothagudem)": [
+    { "name": "Satya Bhaskara Cinema Hall", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sri Seetharama Chitra Mandir", "shows": ["11:30 AM", "6:45 PM", "9:45 PM"] }
+  ],
+  "Sathupalli (Khammam)": [
+    { "name": "Srinivasa Cinema Hall", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sri Srinivasa Picture Palace", "shows": ["2:30 PM", "9:30 PM"] },
+    { "name": "Sri Sai Balaji Theatre", "shows": ["11:15 AM", "2:45 PM", "9:45 PM"] }
+  ],
+  "Kothakota (Wanaparthy)": [
+    { "name": "Sri Devi Theatre", "shows": ["11:00 AM", "2:30 PM"] },
+    { "name": "Bhavani Cinema Hall", "shows": ["6:30 PM", "9:30 PM"] },
+    { "name": "Parameswari Theater", "shows": ["11:30 AM", "6:45 PM", "9:45 PM"] }
+  ],
+  "Shadnagar (Rangareddy)": [
+    { "name": "Parameshwara Cinema Hall", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sai Baba Cinema Hall", "shows": ["11:30 AM", "6:45 PM", "9:30 PM"] },
+    { "name": "Rama Krishna Cinema Hall", "shows": ["2:30 PM", "9:45 PM"] }
+  ],
+  "Kalwakurthy (Nagarkurnool)": [
+    { "name": "Ashoka Cinema Hall", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Parthasaradhi Cinema Hall", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Narayankhed (Sangareddy)": [
+    { "name": "Shetkar Suvarna Cinema Hall", "shows": ["11:00 AM", "2:30 PM"] },
+    { "name": "Venkateswara Cinema Hall", "shows": ["6:30 PM", "9:30 PM"] }
+  ],
+  "Sadasivpet (Sangareddy)": [
+    { "name": "Asian Maheshwari Cinema Hall", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Jyothi Cinema Hall", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Nuzvid (Krishna)": [
+    { "name": "Sri Lakshmi Picture Palace", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Anu Deluxe Theatre", "shows": ["11:30 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Ongole": [
+    { "name": "Gorantla Multiplex", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Babu Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Chilakaluripet": [
+    { "name": "Laxmi Narasimha Deluxe", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sri Venkateswara Deluxe", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Bandarupalli": [
+    { "name": "Manju Picture Palace", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sri Raghavendra Deluxe", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Machilipatnam": [
+    { "name": "Goutam Picture Palace A/C", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Ambica Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Macharla": [
+    { "name": "Vamsi A/C DTS", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Shetkar Suvarna Cinema Hall", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Kannuru": [
+    { "name": "Sree Kanya Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Padmasree Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Kanchincharla": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sri Lakshmi Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Piduguralla": [
+    { "name": "Mini Kanya A/C Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Boss Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Karampudi": [
+    { "name": "Lavanya Deluxe", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Kalyan Deluxe", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Vinukonda": [
+    { "name": "Rajaram Deluxe", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Gopinath Deluxe", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Jaggayyapeta": [
+    { "name": "Theatre Krishnaveni", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sri Rajaveni Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Achampeta": [
+    { "name": "Sria Deluxe", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Manohar Deluxe", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Sangam": [
+    { "name": "Sri Venkateswara Deluxe", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sri Raghavendra Deluxe", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Rayapudi": [
+    { "name": "Ram Deluxe", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Raghavendra Deluxe", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Bhimadole": [
+    { "name": "Sai Lakshmi A/C DTS", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Devi Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Bhimavaram": [
+    { "name": "Sri Ramakrishna Theatre", "shows": ["11:00 AM", "3:00 PM", "7:30 PM"] },
+    { "name": "Geethanjali Theatre", "shows": ["10:30 AM", "2:30 PM", "8:30 PM"] }
+  ],
+  "Bhimlikuduru": [
+    { "name": "Kameswari AC DTS Theatre", "shows": ["11:00 AM", "2:30 PM", "9:30 PM"] },
+    { "name": "Kinnera Theatre", "shows": ["11:15 AM", "6:30 PM", "9:45 PM"] }
+  ],
+  "Chirala": [
+    { "name": "Sri Rama Theatre", "shows": ["10:00 AM", "1:30 PM", "6:30 PM", "9:45 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:00 AM", "3:00 PM", "7:00 PM"] }
+  ],
+  "Srisailam": [
+    { "name": "Mallikarjuna Theatre", "shows": ["10:00 AM", "2:00 PM", "6:30 PM"] },
+    { "name": "Sri Bhramaramba Talkies", "shows": ["11:30 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Dhornala": [
+    { "name": "Sri Sai Balaji Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Vinayaka Theatre", "shows": ["11:00 AM", "3:00 PM", "8:00 PM"] }
+  ],
+  "Gudivada": [
+    { "name": "Vijaya Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Krishna Theatre", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] },
+    { "name": "Padmavathi Theatre", "shows": ["10:30 AM", "2:30 PM", "6:30 PM"] }
+  ],
+  
+  "Srikakulam": [
+    { "name": "Sri Durga Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Theatre", "shows": ["11:30 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Vizianagaram": [
+    { "name": "Sri Sai Baba Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vasantha Mahal", "shows": ["11:30 AM", "3:00 PM", "9:30 PM"] }
+  ],
+  "Anakapalli": [
+    { "name": "Sri Durga Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sarada Theatre", "shows": ["11:30 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Rajam (Srikakulam)": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Palakonda (Srikakulam)": [
+    { "name": "Sri Venkateswara Theatre", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sai Krishna Talkies", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Narasannapeta (Srikakulam)": [
+    { "name": "Sri Lakshmi Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Rama Talkies", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Bobbili (Vizianagaram)": [
+    { "name": "Sri Rama Mahal", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Parvathipuram (Alluri Dist)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Madhuri Talkies", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Salur (Vizianagaram)": [
+    { "name": "Sri Durga Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Rajampet (Annamayya)": [
+    { "name": "Sri Venkateswara Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:30 AM", "6:45 PM", "9:45 PM"] }
+  ],
+  "Kadapa": [
+    { "name": "Asian Cinemas", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "3:00 PM", "8:00 PM"] },
+    { "name": "Surya Mahal", "shows": ["11:30 AM", "3:30 PM", "9:30 PM"] }
+  ],
+  "Proddatur (Kadapa)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Kaveri Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Jammalamadugu (Kadapa)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Surya Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Mydukur (Kadapa)": [
+    { "name": "Sri Lakshmi Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sai Baba Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Badvel (Kadapa)": [
+    { "name": "Sri Rama Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Annapurna Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Anantapur": [
+    { "name": "Sri Sai Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Bharat Talkies", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] },
+    { "name": "Lakshmi Mahal", "shows": ["11:30 AM", "3:00 PM", "9:30 PM"] }
+  ],
+  "Hindupur (Ananthapuramu)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:30 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Tadipatri (Ananthapuramu)": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Guntakal (Ananthapuramu)": [
+    { "name": "Sri Sai Baba Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Shanti Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Dharmavaram (Ananthapuramu)": [
+    { "name": "Sri Lakshmi Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Nandyal": [
+    { "name": "Sri Venkateswara Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Surya Mahal", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Allagadda (Nandyal)": [
+    { "name": "Sri Rama Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Nandikotkur (Nandyal)": [
+    { "name": "Sri Sai Baba Theatre", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sri Lakshmi Talkies", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Atmakur (Nandyal)": [
+    { "name": "Srinivasa Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sri Rama Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Markapur (Prakasam)": [
+    { "name": "Sri Sai Baba Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Theatre", "shows": ["11:30 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Kanigiri (Prakasam)": [
+    { "name": "Sri Rama Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Addanki (Prakasam)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sai Krishna Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Darsi (Prakasam)": [
+    { "name": "Sri Lakshmi Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Rama Talkies", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Kandukur (Prakasam)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Gudur (Tirupati)": [
+    { "name": "Sri Rama Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Srikalahasti (Tirupati)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Venkatagiri (Tirupati)": [
+    { "name": "Sri Sai Baba Theatre", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Nagari (Tirupati)": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Talkies", "shows": ["11:15 AM", "9:30 PM"] }
+  ],
+  "Puttur (Tirupati)": [
+    { "name": "Sri Venkateswara Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sai Krishna Talkies", "shows": ["11:30 AM", "6:45 PM", "9:45 PM"] }
+  ],
+  "Madanapalle (Annamayya)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Surya Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Punganur (Annamayya)": [
+    { "name": "Sri Rama Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Vijaya Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Palamaner (Annamayya)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Amalapuram (Konaseema)": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sarada Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Razam (Srikakulam)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sai Baba Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Mandapeta (East Godavari)": [
+    { "name": "Sri Rama Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Pithapuram (Kakinada)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Prathipadu (Kakinada)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Tuni (Anakapalli)": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sarada Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Yellamanchili (Anakapalli)": [
+    { "name": "Sri Sai Baba Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Tanuku (West Godavari)": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Narsapur (West Godavari)": [
+    { "name": "Sri Venkateswara Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:30 AM", "6:45 PM", "9:45 PM"] }
+  ],
+  "Palacole (West Godavari)": [
+    { "name": "Sri Sai Baba Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sri Rama Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Jangareddygudem (West Godavari)": [
+    { "name": "Sri Durga Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Theatre", "shows": ["11:15 AM", "9:30 PM"] }
+  ],
+  "Akividu (West Godavari)": [
+    { "name": "Sri Lakshmi Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Tadepalligudem (West Godavari)": [
+    { "name": "Sri Rama Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sarada Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Palakollu (West Godavari)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Theatre", "shows": ["11:30 AM", "6:45 PM", "9:45 PM"] }
+  ],
+  "Narasapuram (West Godavari)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Rama Talkies", "shows": ["11:15 AM", "9:30 PM"] }
+  ],
+  "Tenali (Guntur)": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Bapatla": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:30 AM", "6:45 PM", "9:45 PM"] }
+  ],
+  "Repalle (Bapatla)": [
+    { "name": "Sri Lakshmi Theatre", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sai Baba Talkies", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Vetapalem (Bapatla)": [
+    { "name": "Sri Rama Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Ponnur (Guntur)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Macherla (Palnadu)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Narasaraopet (Palnadu)": [
+    { "name": "Eswar Mahal", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Saradhamba", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Miryalaguda (Nalgonda)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:30 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Nalgonda": [
+    { "name": "Sri Rama Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Surya Mahal", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Suryapet (Nalgonda)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Bhongir (Yadadri)": [
+    { "name": "Sri Sai Baba Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Talkies", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Yadagirigutta (Yadadri)": [
+    { "name": "Sri Lakshmi Narasimha Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Devarakonda (Nalgonda)": [
+    { "name": "Sri Rama Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sai Krishna Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Siddipet": [
+    { "name": "Sri Sai Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Gajwel (Siddipet)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Medak": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Sangareddy": [
+    { "name": "Sri Sai Baba Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Zaheerabad (Sangareddy)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:30 AM", "6:45 PM", "9:45 PM"] }
+  ],
+  "Patancheru (Sangareddy)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:15 AM", "9:30 PM"] }
+  ],
+  "Vikarabad (Rangareddy)": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:30 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Tandur (Rangareddy)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sai Baba Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Mahbubnagar": [
+    { "name": "Sri Sai Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Surya Mahal", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:30 AM", "3:00 PM", "9:30 PM"] }
+  ],
+  "Jadcherla (Mahbubnagar)": [
+    { "name": "Sri Rama Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Wanaparthy": [
+    { "name": "Sri Venkateswara Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Talkies", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Gadwal (Jogulamba)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Nagarkurnool": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:30 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Achampet (Nagarkurnool)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sai Baba Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Kollapur (Nagarkurnool)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Talkies", "shows": ["11:15 AM", "9:45 PM"] }
+  ],
+  "Devarkadra (Mahbubnagar)": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Narayanpet": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Mahabubnagar (Mahbubnagar)": [
+    { "name": "Sri Sai Baba Theatre", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Rama Talkies", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Mancherial": [
+    { "name": "Sri Sai Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Bellampalli (Mancherial)": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Luxettipet (Mancherial)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sai Baba Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Nirmal": [
+    { "name": "Sri Rama Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Bodhan (Nizamabad)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:30 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Kamareddy": [
+    { "name": "Sri Venkateswara Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Srinivasa Talkies", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Banswada (Kamareddy)": [
+    { "name": "Sri Rama Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Jagtial": [
+    { "name": "Sri Sai Baba Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Peddapalli": [
+    { "name": "Sri Rama Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Srinivasa Talkies", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Ramagundam (Peddapalli)": [
+    { "name": "Sri Venkateswara Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] },
+    { "name": "Surya Mahal", "shows": ["11:30 AM", "3:00 PM", "9:30 PM"] }
+  ],
+  "Manthani (Peddapalli)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Rama Talkies", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Bhupalpally (Mulugu)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Kothagudem (Bhadradri)": [
+    { "name": "Sri Rama Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Yellandu (Bhadradri)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:15 AM", "9:30 PM"] }
+  ],
+  "Palwancha (Bhadradri)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:30 AM", "6:45 PM", "9:45 PM"] }
+  ],
+  "Wyra (Khammam)": [
+    { "name": "Sri Rama Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Vijaya Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Suryapet (Khammam)": [
+    { "name": "Sri Sai Baba Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Huzurnagar (Nalgonda)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Jangaon": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Station Ghanpur (Warangal)": [
+    { "name": "Sri Sai Baba Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Lakshmi Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Mahabubabad": [
+    { "name": "Sri Venkateswara Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Srinivasa Talkies", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] }
+  ],
+  "Narsampet (Warangal)": [
+    { "name": "Sri Rama Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Sarada Theatre", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Parkal (Warangal)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Mulugu": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["11:30 AM", "9:45 PM"] }
+  ],
+  "Hanamkonda (Warangal)": [
+    { "name": "Sri Sai Theatre", "shows": ["10:00 AM", "2:00 PM", "7:00 PM"] },
+    { "name": "Surya Mahal", "shows": ["11:00 AM", "3:30 PM", "8:30 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:30 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Narsapur (Medak)": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Toopran (Medak)": [
+    { "name": "Sri Venkateswara Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Sai Baba Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Sircilla (Rajanna Sircilla)": [
+    { "name": "Sri Sai Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Vijaya Talkies", "shows": ["11:30 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Elkathurthy (Karimnagar)": [
+    { "name": "Sri Rama Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Srinivasa Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Huzurabad (Karimnagar)": [
+    { "name": "Sri Venkateswara Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Lakshmi Talkies", "shows": ["11:15 AM", "6:45 PM", "9:30 PM"] }
+  ],
+  "Choppadandi (Karimnagar)": [
+    { "name": "Sri Sai Baba Talkies", "shows": ["11:00 AM", "6:30 PM"] },
+    { "name": "Vijaya Theatre", "shows": ["2:30 PM", "9:30 PM"] }
+  ],
+  "Manthani (Karimnagar)": [
+    { "name": "Sri Rama Theatre", "shows": ["11:00 AM", "2:30 PM", "6:30 PM"] },
+    { "name": "Srinivasa Talkies", "shows": ["11:30 AM", "9:45 PM"] }
   ]
 }
+

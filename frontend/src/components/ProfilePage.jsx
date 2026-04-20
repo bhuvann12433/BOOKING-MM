@@ -32,13 +32,10 @@ function ProfilePage() {
     if (username) fetchBookingHistory();
   }, [username]);
 
-  // ✅ FIX: Correct price calculation for both old and new seat formats
-  // New format: "P1-1", "E2-3", "N3-5"
-  // Old format: "Premium-1-1", "Executive-2-3", "Normal-3-5"
   const getSeatPrice = (seat) => {
     if (seat.startsWith("P") || seat.startsWith("Premium")) return 250;
     if (seat.startsWith("E") || seat.startsWith("Executive")) return 200;
-    return 150; // Normal seats
+    return 150;
   };
 
   const parse = (b) => {
@@ -53,7 +50,6 @@ function ProfilePage() {
           date: p.date || "N/A",
           time: p.time || "N/A",
           seats,
-          // ✅ Use getSeatPrice for correct calculation
           total: seats.reduce((s, x) => s + getSeatPrice(x), 0),
         };
       } catch {}
@@ -78,112 +74,121 @@ function ProfilePage() {
   return (
     <div className="pp-page">
 
-      {/* BANNER */}
+      {/* ===== BANNER ===== */}
       <div className="pp-banner">
-        <div className="pp-avatar-wrap">
-          <div className="pp-avatar-inner">{initials}</div>
-        </div>
+        <div className="pp-banner-content">
 
-        <div className="pp-user-info">
-          <div className="pp-user-name">{username || "Guest"}</div>
-          <div className="pp-user-email">{email || ""}</div>
-        </div>
+          <div className="pp-profile-main">
+            <div className="pp-avatar-wrap">
+              <div className="pp-avatar-inner">{initials}</div>
+            </div>
 
-        <div className="pp-stats">
-          <div className="pp-stat-box">
-            <div className="pp-stat-num">{bookingHistory.length}</div>
-            <div className="pp-stat-label">Booked</div>
+            <div>
+              <div className="pp-user-name">{username || "Guest"}</div>
+              <div className="pp-user-email">{email || ""}</div>
+            </div>
           </div>
-          <div className="pp-stat-box">
-            <div className="pp-stat-num">₹{totalSpent.toLocaleString()}</div>
-            <div className="pp-stat-label">Spent</div>
+
+          <div className="pp-stats">
+            <div className="pp-stat-box">
+              <span className="pp-stat-num">{bookingHistory.length}</span>
+              <span className="pp-stat-label">Booked</span>
+            </div>
+            <div className="pp-stat-box">
+              <span className="pp-stat-num">₹{totalSpent.toLocaleString()}</span>
+              <span className="pp-stat-label">Spent</span>
+            </div>
+            <div className="pp-stat-box">
+              <span className="pp-stat-num">{uniqueMovies}</span>
+              <span className="pp-stat-label">Movies</span>
+            </div>
           </div>
-          <div className="pp-stat-box">
-            <div className="pp-stat-num">{uniqueMovies}</div>
-            <div className="pp-stat-label">Movies</div>
-          </div>
+
         </div>
       </div>
 
-      {/* SECTION HEAD */}
-      <div className="pp-sec-head">
-        <FaHistory style={{ color: "#00ffd5", fontSize: 11, flexShrink: 0 }} />
-        <span className="pp-sec-title">Booking History</span>
-        <div className="pp-sec-line" />
-        <span className="pp-sec-count">{bookingHistory.length}</span>
-      </div>
+      {/* ===== CONTENT ===== */}
+      <div className="pp-content-wrapper">
 
-      {/* CONTENT */}
-      {loading ? (
-        <div className="pp-loading">Loading...</div>
-      ) : bookingHistory.length === 0 ? (
-        <div className="pp-empty">
-          <FaTicketAlt className="pp-empty-ico" />
-          <div className="pp-empty-title">No bookings yet</div>
-          <div className="pp-empty-sub">Your confirmed tickets will appear here</div>
+        <div className="pp-sec-head">
+          <FaHistory className="pp-sec-icon" />
+          <span className="pp-sec-title">Booking History</span>
+          <div className="pp-sec-line" />
         </div>
-      ) : (
-        <div className="pp-cards">
-          {bookingHistory.map((booking, i) => {
-            const d = allDetails[i];
-            return (
-              <div
-                key={i}
-                className="pp-card"
-                onClick={() => navigate("/ticket", { state: { ...booking, ...d } })}
-              >
-                <div className="pp-card-strip" />
-                <div className="pp-card-body">
 
-                  <div className="pp-card-row1">
-                    <div className="pp-movie">{d.movieTitle}</div>
-                    <div className="pp-confirmed">Confirmed</div>
-                  </div>
+        {loading ? (
+          <div className="pp-loading">Loading...</div>
+        ) : bookingHistory.length === 0 ? (
+          <div className="pp-loading">
+            <FaTicketAlt size={40} />
+            <p>No bookings yet</p>
+          </div>
+        ) : (
+          <div className="pp-cards">
+            {bookingHistory.map((booking, i) => {
+              const d = allDetails[i];
+              return (
+                <div
+                  key={i}
+                  className="pp-card"
+                  onClick={() =>
+                    navigate("/ticket", { state: { ...booking, ...d } })
+                  }
+                >
+                  <div className="pp-card-strip" />
 
-                  <div className="pp-info-row">
-                    <div className="pp-info-item">
-                      <span className="pp-info-key">City</span>
-                      <span className="pp-info-val">{d.city}</span>
-                    </div>
-                    <div className="pp-info-item">
-                      <span className="pp-info-key">Theater</span>
-                      <span className="pp-info-val">{d.theaterName}</span>
-                    </div>
-                    <div className="pp-info-item">
-                      <span className="pp-info-key">Date</span>
-                      <span className="pp-info-val">{d.date}</span>
-                    </div>
-                    <div className="pp-info-item">
-                      <span className="pp-info-key">Time</span>
-                      <span className="pp-info-val">{d.time}</span>
-                    </div>
-                    <div className="pp-info-item">
-                      <span className="pp-info-key">Total</span>
-                      {/* ✅ Show totalAmount from DB if available, else calculated */}
-                      <span className="pp-info-val teal">
-                        ₹{booking.totalAmount || d.total}
-                      </span>
-                    </div>
-                  </div>
+                  <div className="pp-card-body">
 
-                  {d.seats.length > 0 && (
+                    <div className="pp-card-header-row">
+                      <div className="pp-movie-title">{d.movieTitle}</div>
+                      <div className="pp-status-badge">Confirmed</div>
+                    </div>
+
+                    <div className="pp-info-grid">
+                      <div className="pp-info-group">
+                        <label>City</label>
+                        <span>{d.city}</span>
+                      </div>
+                      <div className="pp-info-group">
+                        <label>Theater</label>
+                        <span>{d.theaterName}</span>
+                      </div>
+                      <div className="pp-info-group">
+                        <label>Date</label>
+                        <span>{d.date}</span>
+                      </div>
+                      <div className="pp-info-group">
+                        <label>Time</label>
+                        <span>{d.time}</span>
+                      </div>
+                      <div className="pp-info-group">
+                        <label>Total</label>
+                        <span>₹{booking.totalAmount || d.total}</span>
+                      </div>
+                    </div>
+
                     <div className="pp-card-footer">
-                      <div className="pp-seats">
-                        <span className="pp-seat-key">Seats</span>
+                      <div>
                         {d.seats.map((s, j) => (
-                          <span key={j} className="pp-seat-chip">{s}</span>
+                          <span key={j} className="pp-seat-tag">{s}</span>
                         ))}
                       </div>
-                      <span className="pp-view-hint">View ticket →</span>
-                    </div>
-                  )}
 
+                      <div className="pp-price-action">
+                        <span className="pp-total-price">
+                          ₹{booking.totalAmount || d.total}
+                        </span>
+                        <span className="pp-arrow">→</span>
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

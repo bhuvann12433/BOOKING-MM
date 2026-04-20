@@ -7,8 +7,6 @@ import theatresData from "../data/theatres.json";
 
 // ============================================
 // ✅ EXPORTED — so Seating.jsx can import same function
-// Both files use identical logic = identical showId always
-// Inputs normalized: lowercase + trimmed to avoid any mismatch
 // ============================================
 export const generateShowId = (movieId, city, theatreName, date, time) => {
   const raw = [
@@ -51,6 +49,32 @@ function SelectLocationPage() {
   const [error, setError] = useState(null);
 
   const dates = ["Today", "Tomorrow", "18 Apr", "19 Apr"];
+
+  // ── 🔧 1. MODIFIED FILTER LOGIC ──
+  const filteredCities = useMemo(
+    () =>
+      search.trim() === ""
+        ? []
+        : cities.filter((c) =>
+            c.toLowerCase().startsWith(search.toLowerCase())
+          ),
+    [search, cities]
+  );
+
+  // ── 🔧 2. ADDED HIGHLIGHT FUNCTION ──
+  const highlightMatch = (text, query) => {
+    if (!query) return text;
+
+    const match = text.slice(0, query.length);
+    const rest = text.slice(query.length);
+
+    return (
+      <>
+        <span style={{ color: "#00ffd5", fontWeight: "800" }}>{match}</span>
+        <span>{rest}</span>
+      </>
+    );
+  };
 
   // ── FETCH CITIES ──
   useEffect(() => {
@@ -155,11 +179,6 @@ function SelectLocationPage() {
     }
   }, [selectedCity, selectedTheatre, shows]);
 
-  const filteredCities = useMemo(
-    () => cities.filter((c) => c.toLowerCase().includes(search.toLowerCase())),
-    [search, cities]
-  );
-
   const getSeatStatus = (name) => {
     const h = name.length % 3;
     if (h === 0) return "🔴 Filling Fast";
@@ -167,7 +186,6 @@ function SelectLocationPage() {
     return "🟢 Available";
   };
 
-  // ── HANDLE NEXT ──
   const handleNext = async () => {
     if (!selectedCity || !selectedTheatre || !selectedTime) {
       setError("❌ Please select city, theatre, and show time");
@@ -183,46 +201,33 @@ function SelectLocationPage() {
       return;
     }
 
-    // Extract show time string
     let showTime = selectedTime;
     if (typeof selectedTime === "object") {
       showTime = selectedTime.showTime || selectedTime.time || String(selectedTime);
     }
 
     const theatreName = selectedTheatre.name || String(selectedTheatre);
-
-    // Try real showId from DB first
     let showId = selectedTime?._id || null;
 
     if (!showId && selectedTheatre._id && state?.movieId) {
       try {
-        const response = await showAPI.getByMovieAndTheatre(
-          state.movieId,
-          selectedTheatre._id
-        );
-        const showList = Array.isArray(response.data?.data)
-          ? response.data.data
-          : [];
-        const matched = showList.find(
-          (s) => s.showTime === showTime || s.time === showTime
-        );
+        const response = await showAPI.getByMovieAndTheatre(state.movieId, selectedTheatre._id);
+        const showList = Array.isArray(response.data?.data) ? response.data.data : [];
+        const matched = showList.find((s) => s.showTime === showTime || s.time === showTime);
         showId = matched?._id || showList[0]?._id || null;
       } catch (err) {
         console.error("Failed to fetch showId:", err.message);
       }
     }
 
-    // ✅ Generate stable showId using RAW selectedDate (never formatted)
-    // Uses exported generateShowId so Seating.jsx can reproduce exact same ID
     if (!showId) {
       showId = generateShowId(
         state?.movieId || state?.movieTitle || "movie",
-        selectedCity,   // ✅ raw
-        theatreName,    // ✅ raw
-        selectedDate,   // ✅ raw: "Today", "19 Apr" etc
-        showTime        // ✅ raw: "3:30 PM"
+        selectedCity,
+        theatreName,
+        selectedDate,
+        showTime
       );
-      console.log("🎬 showId:", showId, "for", theatreName, selectedDate, showTime);
     }
 
     navigate("/SeatBooking", {
@@ -232,8 +237,8 @@ function SelectLocationPage() {
         city: selectedCity,
         theaterName: theatreName,
         theatreId: selectedTheatre._id || null,
-        showId,           // ✅ always valid
-        date: selectedDate, // ✅ RAW date passed to Seating
+        showId,
+        date: selectedDate,
         time: showTime,
         username,
         email,
@@ -255,7 +260,7 @@ function SelectLocationPage() {
         <p className="sl-sub">Choose your perfect experience</p>
       </motion.div>
 
-      {/* CITY */}
+      {/* CITY SECTION */}
       <div className="sl-section">
         <h3>📍 Select City</h3>
         <input
@@ -264,21 +269,34 @@ function SelectLocationPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        
+        {/* ── 🔧 3. MODIFIED CITY GRID UI ── */}
         <div className="sl-grid">
-          {filteredCities.map((city) => (
-            <motion.div
-              whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.95 }}
-              key={city}
-              className={`sl-card ${selectedCity === city ? "active" : ""}`}
-              onClick={() => { setSelectedCity(city); setSelectedTheatre(null); setSelectedTime(null); }}
-            >
-              🏙️ {city}
-            </motion.div>
-          ))}
+          {search.trim() !== "" && filteredCities.length === 0 ? (
+            <p className="sl-error" style={{ gridColumn: "1 / -1", textAlign: "center" }}>
+              ❌ No results found
+            </p>
+          ) : (
+            filteredCities.map((city) => (
+              <motion.div
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.95 }}
+                key={city}
+                className={`sl-card ${selectedCity === city ? "active" : ""}`}
+                onClick={() => {
+                  setSelectedCity(city);
+                  setSelectedTheatre(null);
+                  setSelectedTime(null);
+                }}
+              >
+                🏙️ {highlightMatch(city, search)}
+              </motion.div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* THEATRE */}
+      {/* THEATRE SECTION */}
       {selectedCity && (
         <motion.div className="sl-section" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}>
           <h3>🎭 Select Theatre</h3>
@@ -310,7 +328,7 @@ function SelectLocationPage() {
         </motion.div>
       )}
 
-      {/* DATE */}
+      {/* DATE SECTION */}
       {selectedTheatre && (
         <motion.div className="sl-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <h3>📅 Select Date</h3>
@@ -323,7 +341,7 @@ function SelectLocationPage() {
         </motion.div>
       )}
 
-      {/* TIME */}
+      {/* TIME SECTION */}
       {selectedTheatre && (
         <motion.div className="sl-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <h3>⏰ Select Time</h3>
