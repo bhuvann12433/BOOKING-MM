@@ -20,20 +20,25 @@ const LoginPage = () => {
     }
 
     try {
-      const response = await fetch(`${API}/auth/login`, { // ✅ FIXED: was /login, must be /auth/login
+      const response = await fetch(`${API}/auth/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
+        // ✅ FIX: Backend returns { token, user: { username, email } }
+        // Must read from data.user, not data directly
+        const username = data.user?.username || data.username || "";
+        const userEmail = data.user?.email || data.email || "";
+
         localStorage.setItem("token", data.token);
-        localStorage.setItem("username", data.username);
-        localStorage.setItem("email", data.email);
+        localStorage.setItem("username", username);
+        localStorage.setItem("email", userEmail);
+
+        console.log("✅ Saved to localStorage:", { username, email: userEmail });
 
         alert("Logged in successfully!");
         navigate("/");
@@ -52,8 +57,7 @@ const LoginPage = () => {
           <div className="loginpage-left">
             <h2 className="loginpage-welcome">Welcome Back!</h2>
             <p className="loginpage-message">
-              We are glad to see you again. Please log in to access your
-              account.
+              We are glad to see you again. Please log in to access your account.
             </p>
             <button
               className="loginpage-signup-btn"
@@ -75,7 +79,6 @@ const LoginPage = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-
               <input
                 type="password"
                 className="loginpage-input"
@@ -95,12 +98,8 @@ const LoginPage = () => {
             <div className="loginpage-divider">OR</div>
 
             <div className="loginpage-social">
-              <button className="loginpage-google-btn">
-                Login with Google
-              </button>
-              <button className="loginpage-facebook-btn">
-                Login with Facebook
-              </button>
+              <button className="loginpage-google-btn">Login with Google</button>
+              <button className="loginpage-facebook-btn">Login with Facebook</button>
             </div>
           </div>
         </div>

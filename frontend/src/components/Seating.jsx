@@ -1,13 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import "./Seating.css";
-import { useLocation } from "react-router-dom";
-
-// ✅ Import same function from SelectLocationPage
-// This guarantees showId is ALWAYS identical — fetch, book, re-fetch all match
+import { useLocation, useNavigate } from "react-router-dom";
 import { generateShowId } from "./SelectLocationPage";
 
-// Format date for DISPLAY only — never used in showId generation
 const getFormattedDate = (dateStr) => {
   if (!dateStr) return dateStr;
   if (dateStr === "Today") return new Date().toLocaleDateString("en-GB");
@@ -33,26 +29,16 @@ const getPrice = (category) => {
 
 const Seating = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const {
-    date,         // ✅ RAW: "Today", "19 Apr" etc — never formatted
-    time,
-    movieTitle,
-    city,
-    theaterName,
-    username,
-    email,
-    showId: passedShowId,
-    movieId,
+    date, time, movieTitle, city, theaterName,
+    username, email, showId: passedShowId, movieId,
   } = location.state || {};
 
-  // ✅ Use passed showId directly (it was generated with raw date in SelectLocationPage)
-  // Fallback: regenerate using same function + same raw inputs if somehow missing
   const showId = passedShowId || generateShowId(
     movieId || movieTitle || "movie",
-    city || "",
-    theaterName || "",
-    date || "",   // ✅ RAW — matches SelectLocationPage exactly
-    time || ""
+    city || "", theaterName || "",
+    date || "", time || ""
   );
 
   const [selectedSeats, setSelectedSeats] = useState([]);
@@ -64,7 +50,6 @@ const Seating = () => {
 
   const API = import.meta.env.VITE_API_URL;
 
-  // ✅ Fetch seats using showId — same ID every time for same show
   const fetchSeats = useCallback(async () => {
     try {
       setLoading(true);
@@ -83,11 +68,8 @@ const Seating = () => {
     }
   }, [showId, API]);
 
-  useEffect(() => {
-    fetchSeats();
-  }, [fetchSeats]);
+  useEffect(() => { fetchSeats(); }, [fetchSeats]);
 
-  // Booked seat set for fast lookup
   const bookedSeatNumbers = new Set(
     allSeats
       .filter((s) => s.status === "booked" || s.booked === true)
@@ -132,22 +114,25 @@ const Seating = () => {
 
     try {
       await axios.post(`${API}/save-booking`, {
-        username,
-        email,
-        movieTitle,
-        city,
-        theaterName,
-        date: getFormattedDate(date), // ✅ formatted only for email/display
-        time,
-        showId,                        // ✅ same showId used to fetch seats
-        seats: userLockedSeats,        // ["P1-9", "E2-10"]
+        username, email, movieTitle, city, theaterName,
+        date: getFormattedDate(date),
+        time, showId,
+        seats: userLockedSeats,
       });
 
-      setMessage("✅ Booking confirmed!");
+      setMessage("✅ Booking confirmed! Redirecting...");
       setSelectedSeats([]);
       setUserLockedSeats([]);
       setLockTimer(null);
-      fetchSeats(); // ✅ refresh so booked seats turn grey immediately
+
+      // ✅ Refresh seat map immediately
+      fetchSeats();
+
+      // ✅ Navigate to profile with refresh flag after 1.5s
+      setTimeout(() => {
+        navigate("/ProfilePage", { state: { refresh: true } });
+      }, 1500);
+
     } catch (err) {
       console.error("Booking error:", err);
       const errMsg =
@@ -170,15 +155,12 @@ const Seating = () => {
     setSelectedSeats((prev) =>
       prev.includes(seatNumber)
         ? prev.filter((s) => s !== seatNumber)
-        : prev.length < 8
-        ? [...prev, seatNumber]
-        : prev
+        : prev.length < 8 ? [...prev, seatNumber] : prev
     );
   };
 
   const totalPrice = selectedSeats.reduce(
-    (sum, sn) => sum + getPrice(getCategoryFromSeatNumber(sn)),
-    0
+    (sum, sn) => sum + getPrice(getCategoryFromSeatNumber(sn)), 0
   );
 
   const renderCategory = (prefix, categoryName, price, rows, cols) => (
@@ -219,9 +201,7 @@ const Seating = () => {
 
       <div className="center">
         <div className="screen">SCREEN THIS SIDE</div>
-        {loading ? (
-          <p>Loading seats...</p>
-        ) : (
+        {loading ? <p>Loading seats...</p> : (
           <>
             {renderCategory("P", "Premium", 250, 3, 20)}
             {renderCategory("E", "Executive", 200, 3, 20)}
@@ -234,18 +214,10 @@ const Seating = () => {
         <h3>{selectedSeats.length} Seats Selected</h3>
         <p>{selectedSeats.length ? selectedSeats.join(", ") : "No seats selected"}</p>
         <h4>Total: ₹{totalPrice}</h4>
-
-        {lockTimer && (
-          <p className="lock-timer">⏱️ Lock expires in: {formatTime(lockTimer)}</p>
-        )}
-
+        {lockTimer && <p className="lock-timer">⏱️ Lock expires in: {formatTime(lockTimer)}</p>}
         <div className="button-group">
           {!lockTimer ? (
-            <button
-              disabled={!selectedSeats.length || loading}
-              onClick={lockSeats}
-              className="btn-lock"
-            >
+            <button disabled={!selectedSeats.length || loading} onClick={lockSeats} className="btn-lock">
               🔒 Lock Seats (5 min)
             </button>
           ) : (
